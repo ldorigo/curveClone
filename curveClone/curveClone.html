@@ -41,63 +41,78 @@
     // trace
 
     var trace = [];
-    var tempTrace=[];
+    var tempTrace = [];
     var counter = 0;
-    function radToCoordinates(rad) {
 
-        var dx = Math.cos(rad);
-        var dy = Math.sin(rad);
-        return {dx: dx, dy: dy}
+    function radToCoordinates(rad) {
+        "use strict";
+        var dx = Math.cos(rad),
+                dy = Math.sin(rad);
+        return {
+            dx: dx,
+            dy: dy
+        };
     }
 
     function drawBall() {
+        "use strict";
         ctx.beginPath();
         ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2, true);
         ctx.fillStyle = 'blue';
         ctx.fill();
         ctx.closePath();
     }
+
     function moveBall() {
+        "use strict";
         if (rightPressed) {
-            direction += Math.PI*speed/100;
-        }
-        else if (leftPressed) {
-            direction -= Math.PI*speed /100;
+            direction += Math.PI * speed / 100;
+        } else if (leftPressed) {
+            direction -= Math.PI * speed / 100;
 
         }
         dx = radToCoordinates(direction).dx;
         dy = radToCoordinates(direction).dy;
         var dxdy = Math.abs(dx) + Math.abs(dy);
 
-        dx = dx*speed / dxdy;
-        dy = dy*speed / dxdy;
+        dx = dx * speed / dxdy;
+        dy = dy * speed / dxdy;
 
         ballX += dx;
         ballY += dy;
-        tempTrace.push({X:ballX,Y:ballY,radius:ballRadius});
-        counter ++;
-        if(counter>5){
+        tempTrace.push({
+            X: ballX,
+            Y: ballY,
+            radius: ballRadius
+        });
+        counter += 1;
+        if (counter > 5) {
             trace.push(tempTrace[0]);
             tempTrace = [];
             counter = 0;
 
         }
     }
-    function touchWalls(){
-        if(ballX <0+ballRadius || ballX>canvas.width-ballRadius ||ballY<0+ballRadius|| ballY>canvas.height-ballRadius){
+
+    function touchWalls() {
+        "use strict";
+        if (ballX < ballRadius || ballX > canvas.width - ballRadius || ballY < ballRadius || ballY > canvas.height - ballRadius) {
             return true;
         }
-        else{
-            return false;
-        }
+        return false;
     }
-    function distance(x1,x2,y1,y2){
-        return Math.sqrt(Math.pow(x1 - x2,2)+Math.pow(y1-y2,2));
+
+    function distance(x1, x2, y1, y2) {
+        "use strict";
+        return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }
-    function touchTrail(){
-        for(var t=0;t<trace.length;t++){
-            var dist=distance(trace[t].X,ballX, trace[t].Y,ballY);
-            if( dist< ballRadius*2){
+
+    function touchTrail() {
+        "use strict";
+        var t, dist;
+        for (t = 0; t < trace.length; t += 1) {
+            dist = distance(trace[t].X, ballX, trace[t].Y, ballY);
+            if (dist < ballRadius * 2) {
                 console.log(dist);
                 return true;
 
@@ -108,10 +123,11 @@
 
 
     function draw() {
-
+        "use strict";
         drawBall();
         moveBall();
-        if(touchWalls() || touchTrail()){
+        if (touchWalls() || touchTrail()) {
+            console.log(trace);
             alert("Game Over!");
             document.location.reload();
 
@@ -124,18 +140,19 @@
     document.addEventListener("keyup", keyUpHandler, false);
 
     function keyDownHandler(e) {
-        if (e.keyCode == 39) {
+        "use strict";
+        if (e.keyCode === 39) {
             rightPressed = true;
-        }
-        else if (e.keyCode == 37) {
+        } else if (e.keyCode === 37) {
             leftPressed = true;
         }
     }
+
     function keyUpHandler(e) {
-        if (e.keyCode == 39) {
+        "use strict";
+        if (e.keyCode === 39) {
             rightPressed = false;
-        }
-        else if (e.keyCode == 37) {
+        } else if (e.keyCode === 37) {
             leftPressed = false;
         }
     }
