@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title>Gamedev Canvas Workshop</title>
     <style>
-    	* { padding: 0; margin: 0; }
-    	canvas { background: #eee; display: block; margin: 0 auto; }
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        canvas {
+            background: #eee;
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -13,76 +21,105 @@
 <canvas id="myCanvas" width="480" height="320"></canvas>
 
 <script>
-var canvas= document.getElementById("myCanvas");
-var ctx= canvas.getContext("2d");
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+    // position ball
+
+    var ballX = Math.floor(Math.random() * canvas.width);
+    var ballY = Math.floor(Math.random() * canvas.height);
+    var ballRadius = 3;
+    var direction = Math.floor(Math.random() * (Math.PI * 2));
+    var dx = 1;
+    var dy = 1;
+    var speed = 2;
+
+    // Keys
+
+    var rightPressed = false;
+    var leftPressed = false;
 
 
 
-// position ball
+    function radToCoordinates(rad) {
 
-var ballX = Math.floor(Math.random()*canvas.width);
-var ballY = Math.floor(Math.random()*canvas.height);
-var ballRadius = 5;
+        var dx = Math.cos(rad);
+        var dy = Math.sin(rad);
+        return {dx: dx, dy: dy}
+    }
 
-var dx = 1;
-var dy = 1;
-// Keys
+    function drawBall() {
 
-var rightPressed = false;
-var leftPressed = false;
-
-function drawBall(){
-
-	ctx.beginPath();
-	ctx.arc(ballX,ballY,ballRadius,0,Math.PI*2,true);
-	ctx.fillStyle='blue';
-	ctx.fill();
-	ctx.closePath(); }
-
-function moveBall(){
-	if(rightPressed == false && leftPressed == false){
-
-	}
-	else if(leftPressed){
-		ballX+=1;
-
-	}
-	ballX += dx;
-	ballY += dy;
-
-}
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2, true);
+        ctx.fillStyle = 'blue';
+        ctx.fill();
+        ctx.closePath();
+    }
 
 
+    function moveBall() {
+        if (rightPressed) {
+            direction += Math.PI*speed/100;
+        }
+        else if (leftPressed) {
+            direction -= Math.PI*speed /100;
 
-function draw() {
+        }
+        dx = radToCoordinates(direction).dx;
+        dy = radToCoordinates(direction).dy;
+        var dxdy = Math.abs(dx) + Math.abs(dy);
 
-	drawBall();
-	moveBall();
-	ballX+=dx;
-	ballY+=dy;
-	requestAnimationFrame(draw);
-}
+        dx = dx*speed / dxdy;
+        dy = dy*speed / dxdy;
+
+        ballX += dx;
+        ballY += dy;
+
+    }
+
+    function touchWalls(){
+        if(ballX <0+ballRadius || ballX>canvas.width-ballRadius ||ballY<0+ballRadius|| ballY>canvas.height-ballRadius){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    function draw() {
+
+        drawBall();
+        moveBall();
+        if(touchWalls()){
+            alert("Game Over!");
+            document.location.reload();
+
+        }
+        requestAnimationFrame(draw);
+    }
 
 
-document.addEventListener("keydown",keyDownHandler, false);
-document.addEventListener("keyup",keyUpHandler, false);
+    document.addEventListener("keydown", keyDownHandler, false);
+    document.addEventListener("keyup", keyUpHandler, false);
 
-function keyDownHandler(e){
-	if(e.keyCode ==39){
-		rightPressed=true;
-	}
-	else if(e.keyCode == 37){
-		leftPressed=true;
-	}}
-function keyUpHandler(e){
-	if(e.keyCode ==39){
-		rightPressed=false;
-	}
-	else if(e.keyCode == 37){
-		leftPressed=false;
-	}}
+    function keyDownHandler(e) {
+        if (e.keyCode == 39) {
+            rightPressed = true;
+        }
+        else if (e.keyCode == 37) {
+            leftPressed = true;
+        }
+    }
+    function keyUpHandler(e) {
+        if (e.keyCode == 39) {
+            rightPressed = false;
+        }
+        else if (e.keyCode == 37) {
+            leftPressed = false;
+        }
+    }
 
-draw();
+    draw();
 
 
 </script>
