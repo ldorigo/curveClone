@@ -1,5 +1,6 @@
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
+
 // position ball
 
 var ballX = Math.floor(Math.random() * canvas.width);
@@ -21,10 +22,10 @@ var trace = [];
 var tempTrace = [];
 var counter = 0;
 
-function radToCoordinates(rad) {
+function radToCoordinates(rad) {   //convert a direction in radians to dx and dy
     "use strict";
     var dx = Math.cos(rad),
-            dy = Math.sin(rad);
+        dy = Math.sin(rad);
     return {
         dx: dx,
         dy: dy
@@ -42,7 +43,7 @@ function drawBall() {
 
 function moveBall() {
     "use strict";
-    if (rightPressed) {
+    if (rightPressed) {     //change direction in function of keys
         direction += Math.PI * speed / 100;
     } else if (leftPressed) {
         direction -= Math.PI * speed / 100;
@@ -57,13 +58,13 @@ function moveBall() {
 
     ballX += dx;
     ballY += dy;
-    tempTrace.push({
+    tempTrace.push({        //add current position to temporary trail
         X: ballX,
         Y: ballY,
         radius: ballRadius
     });
     counter += 1;
-    if (counter > 5) {
+    if (counter > 5) {      //after a while, start copying the temporary trail to the trail (this is to avoid that the ball collides with the just-made trail)
         trace.push(tempTrace[0]);
         tempTrace = [];
         counter = 0;
@@ -79,12 +80,12 @@ function touchWalls() {
     return false;
 }
 
-function distance(x1, x2, y1, y2) {
+    function distance(x1, x2, y1, y2) {  // Compute distance between 2 points
     "use strict";
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
 
-function touchTrail() {
+    function touchTrail() { //detect contact with trail
     "use strict";
     var t, dist;
     for (t = 0; t < trace.length; t += 1) {
@@ -98,6 +99,7 @@ function touchTrail() {
     return false;
 }
 
+// main function
 
 function draw() {
     "use strict";
@@ -112,6 +114,7 @@ function draw() {
     requestAnimationFrame(draw);
 }
 
+    //Keyboard events functions
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
