@@ -18,11 +18,11 @@ var leftPressed = false;
 
 // trace
 
-var trace = [];
-var tempTrace = [];
+var trail = [];
+var tempTrail = [];
 var counter = 0;
 
-function radToCoordinates(rad) {   //convert a direction in radians to dx and dy
+function radToCoordinates(rad) {    //convert a direction in radians to dx and dy
     "use strict";
     var dx = Math.cos(rad),
         dy = Math.sin(rad);
@@ -43,7 +43,7 @@ function drawBall() {
 
 function moveBall() {
     "use strict";
-    if (rightPressed) {     //change direction in function of keys
+    if (rightPressed) {             //change direction in function of keys
         direction += Math.PI * speed / 100;
     } else if (leftPressed) {
         direction -= Math.PI * speed / 100;
@@ -58,15 +58,15 @@ function moveBall() {
 
     ballX += dx;
     ballY += dy;
-    tempTrace.push({        //add current position to temporary trail
+    tempTrail.push({                //add current position to temporary trail
         X: ballX,
         Y: ballY,
         radius: ballRadius
     });
     counter += 1;
-    if (counter > 5) {      //after a while, start copying the temporary trail to the trail (this is to avoid that the ball collides with the just-made trail)
-        trace.push(tempTrace[0]);
-        tempTrace = [];
+    if (counter > 5) {              //after a while, start copying the temporary trail to the trail (this is to avoid that the ball collides with the just-made trail)
+        trail.push(tempTrail[0]);
+        tempTrail = [];
         counter = 0;
 
     }
@@ -85,11 +85,11 @@ function touchWalls() {
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
 
-    function touchTrail() { //detect contact with trail
+    function touchTrail() {      //detect contact with trail
     "use strict";
     var t, dist;
-    for (t = 0; t < trace.length; t += 1) {
-        dist = distance(trace[t].X, ballX, trace[t].Y, ballY);
+    for (t = 0; t < trail.length; t += 1) {
+        dist = distance(trail[t].X, ballX, trail[t].Y, ballY);
         if (dist < ballRadius * 2) {
             console.log(dist);
             return true;
@@ -106,7 +106,7 @@ function draw() {
     drawBall();
     moveBall();
     if (touchWalls() || touchTrail()) {
-        console.log(trace);
+        console.log(trail);
         alert("Game Over!");
         document.location.reload();
 
