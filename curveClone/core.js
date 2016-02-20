@@ -3,10 +3,10 @@ var ctx = canvas.getContext("2d");
 
 //  ball
 
-var ballX = Math.floor(50+Math.random() * canvas.width-100);
-var ballY = Math.floor(50+Math.random() * canvas.height-100);
+var ballX = Math.floor(Math.random() * canvas.width * 0.90);
+var ballY = Math.floor(Math.random() * canvas.height * 0.90);
 var ballRadius = 3;
-var direction = Math.floor(Math.random() * (Math.PI * 2));
+var direction = Math.random() * (Math.PI * 2);
 var dx = 1;
 var dy = 1;
 var speed = 2;
@@ -136,8 +136,7 @@ function draw() {
     else{
         framesToHole--;
     }
-
-    if (touchWalls() || touchTrail()) {
+    if (frameCount > 300 && (touchWalls() || touchTrail())) {
         console.log(trail);
         alert("Game Over!");
         document.location.reload();
