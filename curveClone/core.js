@@ -75,17 +75,18 @@ function moveBall() {
             radius: ballRadius
         });
 
-    counter += 1;
-    if (counter > 5) {              //after a while, start copying the temporary trail to the trail (this is to avoid that the ball collides with the just-made trail)
-        trail.push(tempTrail[0]);
-        tempTrail = [];
-        counter = 0;
-    }}
+        counter += 1;
+        if (counter > 5) {              //after a while, start copying the temporary trail to the trail (this is to avoid that the ball collides with the just-made trail)
+            trail.push(tempTrail[0]);
+            tempTrail = [];
+            counter = 0;
+        }
+    }
 }
 
 function touchWalls() {
     "use strict";
-    if (ballX < ballRadius || ballX > canvas.width - ballRadius || ballY < ballRadius || ballY > canvas.height - ballRadius) {
+    if (ballX <= ballRadius || ballX >= canvas.width - ballRadius || ballY <= ballRadius || ballY >= canvas.height - ballRadius) {
         return true;
     }
     return false;
@@ -101,7 +102,7 @@ function touchTrail() {      //detect contact with trail
     var t, dist;
     for (t = 0; t < trail.length; t += 1) {
         dist = distance(trail[t].X, ballX, trail[t].Y, ballY);
-        if (dist < ballRadius * 2) {
+        if (dist <= ballRadius * 2) {
             console.log(dist);
             return true;
 
