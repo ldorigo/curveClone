@@ -3,8 +3,8 @@ var ctx = canvas.getContext("2d");
 
 //  ball
 
-var ballX = Math.floor(50+Math.random() * canvas.width-100);
-var ballY = Math.floor(50+Math.random() * canvas.height-100);
+var ballX = Math.floor(50+Math.random() * (canvas.width-100));
+var ballY = Math.floor(50+Math.random() * (canvas.height-100));
 var ballRadius = 3;
 var direction = Math.floor(Math.random() * (Math.PI * 2));
 var dx = 1;
