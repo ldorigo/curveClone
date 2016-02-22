@@ -13,7 +13,7 @@ var ballRadius = 3;
 var direction = Math.random() * (Math.PI * 2);
 var dx = 1;
 var dy = 1;
-var speed = 2;
+var speed = 1.4;
 var color = "rgba(221,12,132,1)";
 
 // holes
@@ -185,7 +185,6 @@ function drawMenu() {
         rColor: 'rgba(122,122,122,0.1)',
         tColor: "rgb(1,1,1)"
     };
-
     var bP = {
         rX: (canvas.width / 2) + 25 + buttonSize + 6 + 10,
         rY: canvas.height / 2 - buttonSize + 3,
@@ -197,7 +196,6 @@ function drawMenu() {
         rColor: 'rgba(122,122,122,0.1)',
         tColor: "rgb(1,1,1)"
     };
-
     var bStart = {
         rX: (canvas.width / 2) ,
         rY: canvas.height / 2 + 15,
@@ -210,12 +208,11 @@ function drawMenu() {
         tColor: "rgb(1,1,1)"
     };
 
-
-
+    // Clear the canvas
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    //change button colours when hovering
+    //Change button colours when hovering
 
     if (mouseX >= bM.rX && mouseX <= bM.rX + buttonSize && mouseY >= bM.rY && mouseY <= bM.rY + buttonSize) {
         bM.rColor = 'rgba(0,0,122,0.5)';
@@ -321,10 +318,62 @@ function draw() {
 
         if (frameCount > 300 && touchWalls() || touchTrail()){
 
-            state = "begin";
+            state = "gameover";
             reset();
 
         }
+    }
+    else if(state = "gameover"){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.beginPath();
+        ctx.font ="64px";
+        ctx.fillText("Game Over!",canvas.width/2 ,canvas.height/2 ) ;
+        ctx.closePath();
+
+        // button object
+        var bRestart = {
+            rX: (canvas.width / 2) ,
+            rY: canvas.height / 2  ,
+            W: ctx.measureText("Restart").width + 8,
+            H: 26,
+            text: "Restart",
+            tX: canvas.width / 2 +4 ,
+            tY: canvas.height / 2 +21,
+            rColor: 'rgba(122,122,122,0.1)',
+            tColor: "rgb(1,1,1)",
+            normalColor: 'rgba(122,122,122,0.1)',
+            hoverColor: 'rgba(0,0,122,0.5)'
+        };
+
+        //change button colours when hovering
+
+        if (mouseX >= bRestart.rX && mouseX <= bRestart.rX + bRestart.W && mouseY >= bRestart.rY && mouseY <= bRestart.rY + bRestart.H) {
+            bRestart.rColor = bRestart.hoverColor;
+        }
+        else{
+            bRestart.rColor = bRestart.normalColor;
+        }
+
+        //Draw button and text
+
+        ctx.beginPath();
+        ctx.font="24 px";
+        ctx.fillStyle = bRestart.rColor;
+        ctx.fillRect(bRestart.rX, bRestart.rY, bRestart.W, bRestart.H);
+        ctx.fillStyle = bRestart.tColor;
+        ctx.fillText(bRestart.text, bRestart.tX, bRestart.tY);
+        ctx.closePath();
+
+
+        // Effect on click
+
+        if (clickX >= bRestart.rX && clickX <= bRestart.rX + bRestart.W && clickY >= bRestart.rY && clickY <= bRestart.rY + bRestart.H) {
+
+            //...Do stuff
+            state="begin";
+
+        }
+
     }
     requestAnimationFrame(draw);
 }
