@@ -6,13 +6,12 @@ var state = "begin";
 
 var numberOfPlayers = 1;
 var buttonSize = 35 + 6;
-var unPressCount = 0;
 //  ball
 
-var ballX = Math.floor(50 + Math.random() * (canvas.width - 100));
-var ballY = Math.floor(50 + Math.random() * (canvas.height - 100));
+var ballX = Math.floor(0.1*canvas.width + Math.random() * canvas.width * 0.80);
+var ballY = Math.floor(0.1*canvas.height + Math.random() * canvas.height * 0.80);
 var ballRadius = 3;
-var direction = Math.floor(Math.random() * (Math.PI * 2));
+var direction = Math.random() * (Math.PI * 2);
 var dx = 1;
 var dy = 1;
 var speed = 2;
@@ -105,7 +104,7 @@ function moveBall() {
 
 function touchWalls() {
     "use strict";
-    if (ballX < ballRadius || ballX > canvas.width - ballRadius || ballY < ballRadius || ballY > canvas.height - ballRadius) {
+    if (ballX <= ballRadius || ballX >= canvas.width - ballRadius || ballY <= ballRadius || ballY >= canvas.height - ballRadius) {
         return true;
     }
     return false;
@@ -121,7 +120,7 @@ function touchTrail() {      //detect contact with trail
     var t, dist;
     for (t = 0; t < trail.length; t += 1) {
         dist = distance(trail[t].X, ballX, trail[t].Y, ballY);
-        if (dist < ballRadius * 2) {
+        if (dist <= ballRadius * 2) {
             console.log(dist);
             return true;
 
@@ -282,10 +281,8 @@ function draw() {
             framesToHole--;
         }
 
-        if (touchWalls() || touchTrail()) {
+        if (frameCount > 300 && touchWalls() || touchTrail()){
             state = "begin";
-            document.location.reload();
-
         }
     }
     requestAnimationFrame(draw);
