@@ -1,55 +1,13 @@
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
-var state = "begin";
-
-// number of players
-
-var numberOfPlayers = 1;
-var buttonSize = 35 + 6;
-//  ball
-
-var ballX = Math.floor(0.1*canvas.width + Math.random() * canvas.width * 0.80);
-var ballY = Math.floor(0.1*canvas.height + Math.random() * canvas.height * 0.80);
-var ballRadius = 3;
-var direction = Math.random() * (Math.PI * 2);
-var dx = 1;
-var dy = 1;
-var speed = 2;
-var color = "rgba(221,12,132,1)";
-// holes
-
-var hole = false;
-var holeStart = 0;
-var oldX = 0;
-var oldY = 0;
-var frameCount = 0;
-var framesToHole = Math.floor(15 + Math.random() * 100);
-
-
-// Keyboard
-
-var rightPressed = false;
-var leftPressed = false;
-
-var mouseDownX = 0;
-var mouseDownY = 0;
-var mouseX = 0;
-var mouseY = 0;
-var mouseUpX = 0;
-var mouseUpY = 0;
-var clickX= 0;
-var clickY = 0;
-
-var mouse = {
-    X:0,
-    Y:0,
-    pressed:true
-};
-// trace
-
-var trail = [];
-var tempTrail = [];
-var counter = 0;
+var state;
+var numberOfPlayers, buttonSize; 
+var ballX, ballY, ballRadius, direction, dx, dy, speed, color; 
+var hole, holeStart, oldX, oldY, frameCount, framesToHole;
+var rightPressed, leftPressed;
+var mouseDownX, mouseDownY, mouseX, mouseY, mouseUpX, mouseUpY; 
+var clickX, clickY, mouse; 
+var trail, tempTrail, counter; 
 
 function radToCoordinates(rad) {    //convert a direction in radians to dx and dy
     "use strict";
@@ -243,6 +201,60 @@ function drawMenu() {
 
 }
 
+function resetGame() {  // Resets the variables for a new game
+     
+    state = "begin";
+
+    // number of players
+
+    numberOfPlayers = 1;
+    buttonSize = 35 + 6;
+    //  ball
+
+    ballX = Math.floor(0.1*canvas.width + Math.random() * canvas.width * 0.80);
+    ballY = Math.floor(0.1*canvas.height + Math.random() * canvas.height * 0.80);
+    ballRadius = 3;
+    direction = Math.random() * (Math.PI * 2);
+    dx = 1;
+    dy = 1;
+    speed = 2;
+    color = "rgba(221,12,132,1)";
+    // holes
+
+    hole = false;
+    holeStart = 0;
+    oldX = 0;
+    oldY = 0;
+    frameCount = 0;
+    framesToHole = Math.floor(15 + Math.random() * 100);
+
+
+    // Keyboard
+
+    rightPressed = false;
+    leftPressed = false;
+
+    mouseDownX = 0;
+    mouseDownY = 0;
+    mouseX = 0;
+    mouseY = 0;
+    mouseUpX = 0;
+    mouseUpY = 0;
+    clickX= 0;
+    clickY = 0;
+
+    mouse = {
+        X:0,
+        Y:0,
+        pressed:true
+    };
+    // trace
+
+    trail = [];
+    tempTrail = [];
+    counter = 0;
+
+}
 
 
 
@@ -282,11 +294,12 @@ function draw() {
         }
 
         if (frameCount > 300 && touchWalls() || touchTrail()){
-            state = "begin";
+            resetGame();
         }
     }
     requestAnimationFrame(draw);
 }
+
 
 //Keyboard events functions
 
@@ -340,5 +353,5 @@ function keyUpHandler(e) {
         leftPressed = false;
     }
 }
-
+resetGame();
 draw();
