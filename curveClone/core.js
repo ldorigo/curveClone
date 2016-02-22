@@ -2,10 +2,9 @@ var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var state = "begin";
 
-// number of players
-
 var numberOfPlayers = 1;
 var buttonSize = 35 + 6;
+
 //  ball
 
 var ballX = Math.floor(0.1*canvas.width + Math.random() * canvas.width * 0.80);
@@ -16,6 +15,7 @@ var dx = 1;
 var dy = 1;
 var speed = 2;
 var color = "rgba(221,12,132,1)";
+
 // holes
 
 var hole = false;
@@ -50,6 +50,52 @@ var mouse = {
 var trail = [];
 var tempTrail = [];
 var counter = 0;
+// number of players
+function reset(){
+ numberOfPlayers = 1;
+ buttonSize = 35 + 6;
+
+//  ball
+
+ ballX = Math.floor(0.1*canvas.width + Math.random() * canvas.width * 0.80);
+ ballY = Math.floor(0.1*canvas.height + Math.random() * canvas.height * 0.80);
+ ballRadius = 3;
+ direction = Math.random() * (Math.PI * 2);
+ dx = 1;
+ dy = 1;
+ speed = 2;
+ color = "rgba(221,12,132,1)";
+
+// holes
+
+ hole = false;
+ holeStart = 0;
+ oldX = 0;
+ oldY = 0;
+ frameCount = 0;
+ framesToHole = Math.floor(15 + Math.random() * 100);
+
+
+// Keyboard
+
+ rightPressed = false;
+ leftPressed = false;
+
+ clickX= 0;
+ clickY = 0;
+
+ mouse = {
+    X:0,
+    Y:0,
+    pressed:true
+};
+// trace
+
+ trail = [];
+ tempTrail = [];
+    counter = 0;
+
+}
 
 function radToCoordinates(rad) {    //convert a direction in radians to dx and dy
     "use strict";
@@ -104,11 +150,8 @@ function moveBall() {
 
 function touchWalls() {
     "use strict";
-    if (ballX <= ballRadius || ballX >= canvas.width - ballRadius || ballY <= ballRadius || ballY >= canvas.height - ballRadius) {
-        return true;
+    return(ballX <= ballRadius || ballX >= canvas.width - ballRadius || ballY <= ballRadius || ballY >= canvas.height - ballRadius) ;
     }
-    return false;
-}
 
 function distance(x1, x2, y1, y2) {  // Compute distance between 2 points
     "use strict";
@@ -243,13 +286,8 @@ function drawMenu() {
 
 }
 
-
-
-
-
-
 // main function
-
+reset();
 function draw() {
     "use strict";
     if (state == "begin") {
@@ -282,7 +320,10 @@ function draw() {
         }
 
         if (frameCount > 300 && touchWalls() || touchTrail()){
+
             state = "begin";
+            reset();
+
         }
     }
     requestAnimationFrame(draw);
