@@ -151,7 +151,7 @@ function moveBall() {
 function touchWalls() {
     "use strict";
     return(ballX <= ballRadius || ballX >= canvas.width - ballRadius || ballY <= ballRadius || ballY >= canvas.height - ballRadius) ;
-    }
+}
 
 function distance(x1, x2, y1, y2) {  // Compute distance between 2 points
     "use strict";
