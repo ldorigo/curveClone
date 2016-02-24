@@ -10,14 +10,15 @@ var mouse = {
     clicked: false
 };
 var dictKeys = {
-    ArrowLeft:[0, -1],
-    ArrowRight:[0, 1],
-    s: [1,-1],
-    d:[1,1]
+    ArrowLeft: [0, -1],
+    ArrowRight: [0, 1],
+    s: [1, -1],
+    d: [1, 1]
 };
 
 document.addEventListener("click", function () {
-    doClick();}, false);
+    doClick();
+}, false);
 document.addEventListener("mousemove", doMouseMove, false);
 
 function doClick() {
@@ -32,19 +33,16 @@ function doMouseMove(e) {
 
 function keyDownHandler(e, balls) {
     "use strict";
-    if(e.key in dictKeys) {
+    if (e.key in dictKeys) {
         var moveD = dictKeys[e.key];
-        if(moveD[1]==1){
-            balls[moveD[0]].rightPressed=true;
+        if (moveD[1] == 1) {
+            balls[moveD[0]].rightPressed = true;
         }
-        else{
-            balls[dictKeys[e.key][0]].leftPressed=true;
+        else {
+            balls[dictKeys[e.key][0]].leftPressed = true;
         }
     }
 }
-// Qué?
-
-
 
 function keyUpHandler(e, balls) {
     "use strict";
@@ -61,26 +59,17 @@ function keyUpHandler(e, balls) {
     }
     balls.map(cb);
 }
-//
 
-function stateChooser() {
-    if (Game.state == "begin") {
-        drawMenu("beginMenu");
-    }
-    else if (Game.state == 'game') {
-        startGame(Game.numberOfPlayers);
-    }
-}
 
 function drawMenu(name) {
     if (name == "beginMenu") {
 
         Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
-        // Make and draw buttons
+        // Make and draw butts
 
-        var buttons = [];
-        buttons.push({
+        var butts = [];
+        butts.push({
             rX: (Game.canvas.width / 2),
             rY: Game.canvas.height / 2 + 15,
             W: Game.ctx.measureText("Start Game!").width + 6,
@@ -93,9 +82,11 @@ function drawMenu(name) {
             tColor: "rgb(1,1,1)",
             hoverColor: 'rgba(122,122,122,0.5)',
             normalColor: 'rgba(122,122,122,0.1)',
-            action: function (){Game.state="game";}    }
+            action: function () {
+                Game.state = "game";
+            }
         });
-        buttons.push({
+        butts.push({
             rX: (Game.canvas.width / 2) + 25 + 45 + 6 + 10,
             rY: Game.canvas.height / 2 - 45 + 3,
             W: 45,
@@ -108,59 +99,84 @@ function drawMenu(name) {
             tColor: "rgb(1,1,1)",
             hoverColor: 'rgba(122,122,122,0.5)',
             normalColor: 'rgba(122,122,122,0.1)',
-            action: function(){
-                if(general.numberOfPlayers<5){
+            action: function () {
+                if (general.numberOfPlayers < 5) {
                     general.numberOfPlayers++;
                 }
             }
         });
-        buttons.push(
-        )};
-
-        // Display text
+        butts.push({
+                rX: (Game.canvas.width / 2) + 25,
+                rY: Game.canvas.height / 2 - 45 + 3,
+                W: 45,
+                H: 45,
+                text: "-",
+                fontSize: "35pt",
+                tX: Game.canvas.width / 2 + 25 + 8,
+                tY: Game.canvas.height / 2,
+                color: 'rgba(122,122,122,0.1)',
+                tColor: "rgb(1,1,1)",
+                hoverColor: 'rgba(122,122,122,0.5)',
+                normalColor: 'rgba(122,122,122,0.1)',
+                action: function () {
+                    if (general.numberOfPlayers > 1) {
+                        general.numberOfPlayers--;
+                    }
+                }
+            });
 
         Game.ctx.fillStyle = "rgb(1,1,1)";
         Game.ctx.font = "24px serif";
         Game.ctx.fillText("Select number of players: ", Game.canvas.width / 2 - Game.ctx.measureText("Select number of players: ").width, Game.canvas.height / 2);
         Game.ctx.fillText(" " + general.numberOfPlayers, Game.canvas.width / 2, Game.canvas.height / 2);
 
-        for (var i=0; i<buttons.length;i++) {
-            updateButton(buttons[i]);
-            drawButton(buttons[i]);
+        for (var i = 0; i < butts.length; i++) {
+            updateButton(butts[2-i]);
         }
-
-    window.requestAnimationFrame(function () {
-        stateChooser();
-    });
-
-}
-
-function updateButton(button) {
-    if (mouse.x >= button.rX && mouse.x <= button.rX + button.W && mouse.y >= button.rY && mouse.y <= button.rY + button.H && mouse.clicked == false) {
-        button.color = button.hoverColor;
+        for (var j = 0; j < butts.length; j++) {
+            drawButton(butts[j]);
+        }
     }
-    else if (mouse.x >= button.rX && mouse.x <= button.rX + button.W && mouse.y >= button.rY && mouse.y <= button.rY + button.H && mouse.clicked == true) {
-        button.action();
+
+
+
+    if (Game.state == "begin") {
         mouse.clicked=false;
+        window.requestAnimationFrame(function () {
+            drawMenu("beginMenu")
+        });
     }
     else {
-        button.color = button.normalColor;
-        mouse.clicked=false;
+        Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
+        startGame(general.numberOfPlayers);
+    }
+
+}
+
+function updateButton(butt) {
+    console.log(mouse.clicked);
+    if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && mouse.clicked == false) {
+        butt.color = butt.hoverColor;
+        console.log("hovering button " + butt.text)
+    }
+    else if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && mouse.clicked == true) {
+        butt.action();
+        console.log("clicked button " + butt.text);
+    }
+    else {
+        butt.color = butt.normalColor;
     }
 }
 
-function drawButton(button) {
+function drawButton(butt) {
     Game.ctx.beginPath();
-    Game.ctx.font = button.fontSize;
-    Game.ctx.fillStyle = button.color;
-    Game.ctx.fillRect(button.rX, button.rY, button.W, button.H);
-    Game.ctx.fillStyle = button.tColor;
-    Game.ctx.fillText(button.text, button.tX, button.tY);
+    Game.ctx.font = butt.fontSize;
+    Game.ctx.fillStyle = butt.color;
+    Game.ctx.fillRect(butt.rX, butt.rY, butt.W, butt.H);
+    Game.ctx.fillStyle = butt.tColor;
+    Game.ctx.fillText(butt.text, butt.tX, butt.tY);
     Game.ctx.closePath();
 }
-
-
-
 
 
 function touchWalls() { //TODO
@@ -268,7 +284,7 @@ function updateBall(ball) {
         });
         ball.counter++;
         if (ball.counter > (ball.radius + 1)) {
-            for (var i= 0;i<tempTrail.length;i++) {
+            for (var i = 0; i < tempTrail.length; i++) {
                 ball.trail.push(tempTrail[i]);
             }
             ball.tempTrail = [];
@@ -294,7 +310,6 @@ function updateAndDraw(balls) {
 }
 
 
-
 function startGame(nPlayers) {
     "use strict";
     var balls = createBalls(nPlayers);
@@ -316,7 +331,7 @@ function startGame(nPlayers) {
     Game.canvas = document.getElementById("myCanvas");
     Game.ctx = Game.canvas.getContext("2d");
 
-    stateChooser();
+    drawMenu("beginMenu");
 
 }());
 
