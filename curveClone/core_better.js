@@ -228,14 +228,14 @@ function updateAndDraw(balls) {
     "use strict";
     var i;
     for (i = 0; i < balls.length; i += 1) {
-        balls[i] = updateBall(balls[i]);
+        balls[i] = updateBall(balls[i],balls);
     }
     for (i = 0; i < balls.length; i += 1) {
         drawBall(balls[i]);
     }
 
     for (i = 0; i < balls.length; i += 1) {
-        if(balls[i].touchesWall){
+        if(balls[i].touchesWall||balls[i].touchesTrail){
             alert("You lost!");
         }
     }
@@ -243,7 +243,7 @@ function updateAndDraw(balls) {
         updateAndDraw(balls);
     });
 }
-function updateBall(ball) {
+function updateBall(ball,balls) {
     "use strict";
     if(ball.framesToHole>0){
         ball.framesToHole--;
@@ -269,23 +269,24 @@ function updateBall(ball) {
         ball.touchesWall=true;
     }
 
+    if(touchTrail(ball,balls)){
+        ball.touchesTrail = true;
+    }
+
     ball.oldX = ball.x;
     ball.oldY = ball.y;
 
     ball.x += dx;
     ball.y += dy;
     if (ball.hole == false) {
-        ball.tempTrail.push({  //if it's not in hole state, add current position to temporary trail
-            X: ball.x,
-            Y: ball.y,
+        ball.tempTrail= [{  //if it's not in hole state, add current position to temporary trail
+            x: ball.x,
+            y: ball.y,
             r: ball.r
-        });
+        }].concat(ball.tempTrail);
         ball.counter++;
-        if (ball.counter > (ball.r + 1)) {
-            for (var i = 0; i < ball.tempTrail.length; i++) {
-                ball.trail.push(ball.tempTrail[i]);
-            }
-            ball.tempTrail = [];
+        if (ball.counter > (ball.r *2 +1)) {
+                ball.trail.push(ball.tempTrail.pop());
         }
     }
     else{
@@ -328,12 +329,11 @@ function touchWalls(ball) {
 function touchTrail(ball,balls) {      //detect contact with trail
     "use strict";
     var t, dist;
-    for (t = 0; t < balls[1].trail.length; t += 1) {
-        dist = distance(balls[1].trail[t].X, balls[1].X, balls[1].trail[t].Y, balls[1].Y);
-        if (dist <= balls[1].r * 2) {
+    for (t = 0; t < ball.trail.length; t ++) {
+        dist = distance(ball.trail[t].x, ball.x, ball.trail[t].y, ball.y);
+        if (dist <= ball.r + ball.trail[t].r) {
             console.log(dist);
             return true;
-
         }
     }
     return false;
@@ -349,10 +349,6 @@ function radToCoords(rad) {
         dy: Math.sin(rad)
     };
 }
-
-
-
-
 
 
 (function () {
