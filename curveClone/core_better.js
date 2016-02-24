@@ -102,7 +102,7 @@ function drawMenu(name) {
             hoverColor: 'rgba(122,122,122,0.5)',
             normalColor: 'rgba(122,122,122,0.1)',
             action: function () {
-                if (general.numberOfPlayers < 5) {
+                if (general.numberOfPlayers < 4) {
                     general.numberOfPlayers++;
                 }
             }
@@ -139,8 +139,12 @@ function drawMenu(name) {
             drawButton(butts[j]);
         }
     }
+    else if(name=="lost"){
+        Game.ctx.fillStyle = "rgb(1,1,1)";
+        Game.ctx.font = "44px serif";
+        Game.ctx.fillText("Game Over!", Game.canvas.width / 2 - Game.ctx.measureText("Game Over!").width, Game.canvas.height / 2);
 
-
+    }
 
     if (Game.state == "begin") {
         mouse.clicked=false;
@@ -148,7 +152,13 @@ function drawMenu(name) {
             drawMenu("beginMenu")
         });
     }
-    else {
+    else if (Game.state == "lost") {
+        mouse.clicked=false;
+        window.requestAnimationFrame(function () {
+            drawMenu("lost")
+        });
+    }
+    else if(state="begin"){
         Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
         startGame(general.numberOfPlayers);
     }
@@ -215,7 +225,7 @@ function createRandBall() {
         dx: 1,
         dy: 1,
         speed: 2,
-        color: "rgba(221,12,132,1)",
+        color: "rgba("+Math.floor(Math.random()*256)+","+Math.floor(Math.random()*256)+","+Math.floor(Math.random()*256)+",1)",
         trail: [],
         tempTrail: [],
         leftPressed: false,
@@ -228,6 +238,7 @@ function createRandBall() {
         touchesTrail: false
     };
 }
+
 function updateAndDraw(balls) {
     "use strict";
     var i;
@@ -240,7 +251,10 @@ function updateAndDraw(balls) {
 
     for (i = 0; i < balls.length; i += 1) {
         if(balls[i].touchesWall||balls[i].touchesTrail){
-            alert("You lost!");
+            Game.state = "lost";
+            window.requestAnimationFrame(function () {
+                drawMenu("lost");
+            });
         }
     }
     window.requestAnimationFrame(function () {
@@ -344,7 +358,7 @@ function touchTrail(ball,balls) {      //detect contact with trail
         }
     }
     return false;
-}
+} //Needs to be *seriously* optimised
 function distance(x1, x2, y1, y2) {  // Compute distance between 2 points
     "use strict";
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
