@@ -33,6 +33,9 @@ function keyDownHandler(e, balls) {
     "use strict";
     if (e.key in dictKeys) {
         var moveD = dictKeys[e.key];
+        if(moveD[0] >= balls.length){
+            return;
+        }
         if (moveD[1] == 1) {
             balls[moveD[0]].rightPressed = true;
         }
@@ -45,6 +48,9 @@ function keyUpHandler(e, balls) {
     "use strict";
     if (e.key in dictKeys) {
         var moveD = dictKeys[e.key];
+        if(moveD[0] >= balls.length) {
+            return;
+        }
         if (moveD[1] == 1) {
             balls[moveD[0]].rightPressed = false;
         }
@@ -123,7 +129,7 @@ function drawMenu(name) {
         Game.ctx.fillText(" " + general.numberOfPlayers, Game.canvas.width / 2, Game.canvas.height / 2);
 
         for (var i = 0; i < butts.length; i++) {
-            updateButton(butts[2-i]);
+            updateButton(butts[i]);
         }
         for (var j = 0; j < butts.length; j++) {
             drawButton(butts[j]);
