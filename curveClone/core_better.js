@@ -13,7 +13,11 @@ var dictKeys = {
     37: [0, -1], //Left Arrow
     39: [0, 1], //Right Arrow
     68: [1, 1], //d
-    83: [1, -1] //s
+    83: [1, -1], //s
+    66: [2, -1], //b
+    78: [2, 1], //n
+    88: [3,-1], //x
+    67: [3,1] //c
 };
 
 document.addEventListener("click", function () {
@@ -328,12 +332,15 @@ function touchWalls(ball) {
 }
 function touchTrail(ball,balls) {      //detect contact with trail
     "use strict";
-    var t, dist;
-    for (t = 0; t < ball.trail.length; t ++) {
-        dist = distance(ball.trail[t].x, ball.x, ball.trail[t].y, ball.y);
-        if (dist <= ball.r + ball.trail[t].r) {
-            console.log(dist);
-            return true;
+    var t,i, dist;
+
+    for(i=0;i<balls.length;i++){
+        for (t = 0; t < balls[i].trail.length; t ++) {
+            dist = distance(balls[i].trail[t].x, ball.x, balls[i].trail[t].y, ball.y);
+            if (dist <= ball.r + balls[i].trail[t].r) {
+                console.log(dist);
+                return true;
+            }
         }
     }
     return false;
