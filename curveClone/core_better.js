@@ -25,12 +25,10 @@ function doClick() {
     "use strict";
     mouse.clicked = true;
 }
-
 function doMouseMove(e) {
     mouse.x = e.pageX - Game.canvas.offsetLeft;
     mouse.y = e.pageY;
 }
-
 function keyDownHandler(e, balls) {
     "use strict";
     if (e.key in dictKeys) {
@@ -43,24 +41,18 @@ function keyDownHandler(e, balls) {
         }
     }
 }
-
 function keyUpHandler(e, balls) {
     "use strict";
-    var cb;
-    if (e.key === "ArrowLeft") {
-        cb = function (ball) {
-            ball.leftPressed = false;
-        };
+    if (e.key in dictKeys) {
+        var moveD = dictKeys[e.key];
+        if (moveD[1] == 1) {
+            balls[moveD[0]].rightPressed = false;
+        }
+        else {
+            balls[dictKeys[e.key][0]].leftPressed = false;
+        }
     }
-    if (e.key === "ArrowRight") {
-        cb = function (ball) {
-            ball.rightPressed = false;
-        };
-    }
-    balls.map(cb);
 }
-
-
 function drawMenu(name) {
     if (name == "beginMenu") {
 
@@ -152,7 +144,6 @@ function drawMenu(name) {
     }
 
 }
-
 function updateButton(butt) {
     console.log(mouse.clicked);
     if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && mouse.clicked == false) {
@@ -167,7 +158,6 @@ function updateButton(butt) {
         butt.color = butt.normalColor;
     }
 }
-
 function drawButton(butt) {
     Game.ctx.beginPath();
     Game.ctx.font = butt.fontSize;
@@ -233,7 +223,9 @@ function createRandBall() {
         hole: false,
         framesToHole: Math.floor(Math.random() * 100 + 15),
         holeStart: 0,
-        counter: 0
+        counter: 0,
+        touchesWall:false,
+        touchesTrail: false
     };
 }
 
@@ -272,8 +264,10 @@ function updateBall(ball) {
 
     dx = dx * ball.speed / dxdy;
     dy = dy * ball.speed / dxdy;
+
     ball.oldX = ball.x;
     ball.oldY = ball.y;
+
     ball.x += dx;
     ball.y += dy;
     if (ball.hole = false) {
