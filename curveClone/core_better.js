@@ -56,6 +56,9 @@ function keyUpHandler(e, balls) {
         }
     }
 }
+
+//menu functions
+
 function drawMenu(name) {
     if (name == "beginMenu") {
 
@@ -168,42 +171,31 @@ function drawButton(butt) {
     Game.ctx.closePath();
 }
 
-
-function touchWalls(ball) {
+// Game functions
+function startGame(nPlayers) {
     "use strict";
-    return (ball.x <= ball.r ||
-            ball.x >= Game.canvas.width - ball.r ||
-            ball.y <= ball.r ||
-            ball.y >= Game.canvas.height - ball.r);
+    var balls = createBalls(nPlayers);
+
+    document.addEventListener("keydown", function (e) {
+        keyDownHandler(e, balls);
+    }, false);
+    document.addEventListener("keyup", function (e) {
+        keyUpHandler(e, balls);
+    }, false);
+
+
+    updateAndDraw(balls);
 }
-
-function distance(x1, x2, y1, y2) {  // Compute distance between 2 points
+function createBalls(nPlayers) {
     "use strict";
-    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-}
-
-function touchTrail(ball,balls) {      //detect contact with trail
-    "use strict";
-    var t, dist;
-    for (t = 0; t < balls[1].trail.length; t += 1) {
-        dist = distance(balls[1].trail[t].X, balls[1].X, balls[1].trail[t].Y, balls[1].Y);
-        if (dist <= balls[1].r * 2) {
-            console.log(dist);
-            return true;
-
-        }
+    // Returns an array of Ball objects
+    var balls = [];
+    var i;
+    for (i = 0; i < nPlayers; i += 1) {
+        balls.push(createRandBall());
     }
-    return false;
+    return balls;
 }
-
-function radToCoords(rad) {
-    "use strict";
-    return {
-        dx: Math.cos(rad),
-        dy: Math.sin(rad)
-    };
-}
-
 function createRandBall() {
     "use strict";
     var w = Game.canvas.width;
@@ -232,33 +224,25 @@ function createRandBall() {
         touchesTrail: false
     };
 }
-
-function createBalls(nPlayers) {
+function updateAndDraw(balls) {
     "use strict";
-    // Returns an array of Ball objects
-    var balls = [];
     var i;
-    for (i = 0; i < nPlayers; i += 1) {
-        balls.push(createRandBall());
+    for (i = 0; i < balls.length; i += 1) {
+        balls[i] = updateBall(balls[i]);
     }
-    return balls;
+    for (i = 0; i < balls.length; i += 1) {
+        drawBall(balls[i]);
+    }
+
+    for (i = 0; i < balls.length; i += 1) {
+        if(balls[i].touchesWall){
+            alert("You lost!");
+        }
+    }
+    window.requestAnimationFrame(function () {
+        updateAndDraw(balls);
+    });
 }
-
-function drawBall(ball) {
-    "use strict";
-    Game.ctx.beginPath();
-    Game.ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2, true);
-    if(ball.hole==false){
-        Game.ctx.fillStyle = ball.color;
-    }
-    else{
-        Game.ctx.fillStyle = "rgba(122,122,122,0.1)";
-
-    }
-    Game.ctx.fill();
-    Game.ctx.closePath();
-}
-
 function updateBall(ball) {
     "use strict";
     if(ball.framesToHole>0){
@@ -315,42 +299,61 @@ function updateBall(ball) {
     return ball;
 
 }
-
-function updateAndDraw(balls) {
+function drawBall(ball) {
     "use strict";
-    var i;
-    for (i = 0; i < balls.length; i += 1) {
-        balls[i] = updateBall(balls[i]);
+    Game.ctx.beginPath();
+    Game.ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2, true);
+    if(ball.hole==false){
+        Game.ctx.fillStyle = ball.color;
     }
-    for (i = 0; i < balls.length; i += 1) {
-        drawBall(balls[i]);
-    }
+    else{
+        Game.ctx.fillStyle = "rgba(122,122,122,0.1)";
 
-    for (i = 0; i < balls.length; i += 1) {
-        if(balls[i].touchesWall){
-            alert("You lost!");
+    }
+    Game.ctx.fill();
+    Game.ctx.closePath();
+}
+
+
+
+//Helper functions
+
+function touchWalls(ball) {
+    "use strict";
+    return (ball.x <= ball.r ||
+            ball.x >= Game.canvas.width - ball.r ||
+            ball.y <= ball.r ||
+            ball.y >= Game.canvas.height - ball.r);
+}
+function touchTrail(ball,balls) {      //detect contact with trail
+    "use strict";
+    var t, dist;
+    for (t = 0; t < balls[1].trail.length; t += 1) {
+        dist = distance(balls[1].trail[t].X, balls[1].X, balls[1].trail[t].Y, balls[1].Y);
+        if (dist <= balls[1].r * 2) {
+            console.log(dist);
+            return true;
+
         }
     }
-    window.requestAnimationFrame(function () {
-        updateAndDraw(balls);
-    });
+    return false;
 }
-
-
-function startGame(nPlayers) {
+function distance(x1, x2, y1, y2) {  // Compute distance between 2 points
     "use strict";
-    var balls = createBalls(nPlayers);
-
-    document.addEventListener("keydown", function (e) {
-        keyDownHandler(e, balls);
-    }, false);
-    document.addEventListener("keyup", function (e) {
-        keyUpHandler(e, balls);
-    }, false);
-
-
-    updateAndDraw(balls);
+    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
+function radToCoords(rad) {
+    "use strict";
+    return {
+        dx: Math.cos(rad),
+        dy: Math.sin(rad)
+    };
+}
+
+
+
+
+
 
 (function () {
     "use strict";
