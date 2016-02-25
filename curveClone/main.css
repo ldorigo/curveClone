@@ -4,7 +4,8 @@
 }
 
 canvas {
-    background: #eee;
+    background: rgba(0,0,0,0);
     display: block;
+    border: 1px solid black;
     margin: 0 auto;
 }
