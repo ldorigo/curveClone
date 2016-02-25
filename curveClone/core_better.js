@@ -160,13 +160,13 @@ function drawMenu(name) {
     if (Game.state == "begin") {
         mouse.clicked = false;
         window.requestAnimationFrame(function() {
-            drawMenu("beginMenu")
+            drawMenu("beginMenu");
         });
     } else if (Game.state == "lost") {
         mouse.clicked = false;
         drawMenu("lost");
         return;
-    } else if (state = "begin") {
+    } else if (state == "begin") {
         Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
         startGame(general.numberOfPlayers);
     }
@@ -174,9 +174,9 @@ function drawMenu(name) {
 }
 
 function updateButton(butt) {
-    if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && mouse.clicked == false) {
+    if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && !mouse.clicked) {
         butt.color = butt.hoverColor;
-    } else if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && mouse.clicked == true) {
+    } else if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && !mouse.clicked) {
         butt.action();
     } else {
         butt.color = butt.normalColor;
@@ -258,13 +258,13 @@ function updateAndDraw(balls) {
     for (i = 0; i < balls.length; i += 1) {
         drawBall(balls[i]);
     }
-
+    var lostF = function() {
+        drawMenu("lost");
+    };
     for (i = 0; i < balls.length; i += 1) {
         if (balls[i].touchesWall || balls[i].touchesTrail) {
             Game.state = "lost";
-            window.requestAnimationFrame(function() {
-                drawMenu("lost");
-            });
+            window.requestAnimationFrame(lostF);
             return;
         }
     }
@@ -309,7 +309,7 @@ function updateBall(ball, balls) {
 
     ball.x += dx;
     ball.y += dy;
-    if (ball.hole == false) {
+    if (!ball.hole) {
 
         ball.counter++;
     } else {
@@ -328,7 +328,7 @@ function drawBall(ball) {
     "use strict";
     Game.ctx.beginPath();
     Game.ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2, true);
-    if (ball.hole == false) {
+    if (!ball.hole) {
         Game.ctx.fillStyle = ball.color;
     } else {
         Game.ctx.fillStyle = "rgba(" + Game.holeColor.join(",") + ")";
@@ -353,7 +353,7 @@ function touchWalls(ball) {
 
 function touchTrail(ball, dx, dy) {
     "use strict";
-    if(ball.hole)
+    if (ball.hole)
         return false; // Fast check
     // Grab the pixel data at the current x y coords: i'm sure flash has an equivalent function //
     var pixelData = Game.ctx.getImageData(ball.x + dx * 3, ball.y + dy * 3, 1, 1).data;
