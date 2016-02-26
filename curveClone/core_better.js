@@ -14,7 +14,6 @@ var Game = {
 var general = {
     numberOfPlayers: 4
 };
-var players=[];
 var mouse = {
     x: 0,
     y: 0,
@@ -117,7 +116,6 @@ function drawMenu(name) {
             action: function() {
                 if (general.numberOfPlayers < 4) {
                     general.numberOfPlayers++;
-                    addPlayer("player"+numberOfPlayers,players)
                 }
             }
         });
@@ -152,7 +150,7 @@ function drawMenu(name) {
         Game.ctx.fillText(" " + general.numberOfPlayers, Game.canvas.width / 2, Game.canvas.height / 2);
 
         for (var i = 0; i < butts.length; i++) {
-            updateButton(butts[i]);
+            updateButton(butts[2-i]);
         }
         for (var j = 0; j < butts.length; j++) {
             drawButton(butts[j]);
@@ -401,6 +399,7 @@ function addPlayer(name,players){
         score:0
     });
 }
+
 
 (function() {
     "use strict";
