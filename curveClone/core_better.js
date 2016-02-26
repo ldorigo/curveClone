@@ -12,8 +12,7 @@ var Game = {
     holeColor: [200, 200, 200, 1]
 };
 var general = {
-    numberOfPlayers: 4,
-    numberOfFrames:0
+    numberOfPlayers: 4
 };
 var mouse = {
     x: 0,
@@ -151,7 +150,7 @@ function drawMenu(name) {
         Game.ctx.fillText(" " + general.numberOfPlayers, Game.canvas.width / 2, Game.canvas.height / 2);
 
         for (var i = 0; i < butts.length; i++) {
-            updateButton(butts[2 - i]);
+            updateButton(butts[2-i]);
         }
         for (var j = 0; j < butts.length; j++) {
             drawButton(butts[j]);
@@ -270,9 +269,7 @@ function updateAndDraw(balls) {
     };
     for (i = 0; i < balls.length; i += 1) {
         if(balls[i].touchesWall && general.numberOfFrames>300||balls[i].touchesTrail){
-      
             Game.state = "lost";
-    
             window.requestAnimationFrame(lostF);
             return;
         }
@@ -381,7 +378,7 @@ function touchTrail(ball, dx, dy) {
         return false;
     }
 
-} //Needs to be *seriously* optimised
+}
 function distance(x1, x2, y1, y2) { // Compute distance between 2 points
     "use strict";
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
@@ -393,6 +390,14 @@ function radToCoords(rad) {
         dx: Math.cos(rad),
         dy: Math.sin(rad)
     };
+}
+
+function addPlayer(name,players){
+    players.push({
+        name: name,
+        color: "rgba("+Math.floor(Math.random()*256)+","+Math.floor(Math.random()*256)+","+Math.floor(Math.random()*256)+",1)",
+        score:0
+    });
 }
 
 
