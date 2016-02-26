@@ -2,7 +2,8 @@
 // ^^ Comment for jsLint
 var Game = {state: 'begin'};
 var general = {
-    numberOfPlayers: 4
+    numberOfPlayers: 4,
+    numberOfFrames:0
 };
 var mouse = {
     x: 0,
@@ -128,6 +129,11 @@ function drawMenu(name) {
             });
 
         Game.ctx.fillStyle = "rgb(1,1,1)";
+        Game.ctx.font = "100px serif";
+        Game.ctx.fillText("CurveClone" +
+            "", Game.canvas.width / 2 - Game.ctx.measureText("Select number of players: ").width, Game.canvas.height / 2);
+
+        Game.ctx.fillStyle = "rgb(1,1,1)";
         Game.ctx.font = "24px serif";
         Game.ctx.fillText("Select number of players: ", Game.canvas.width / 2 - Game.ctx.measureText("Select number of players: ").width, Game.canvas.height / 2);
         Game.ctx.fillText(" " + general.numberOfPlayers, Game.canvas.width / 2, Game.canvas.height / 2);
@@ -241,6 +247,7 @@ function createRandBall() {
 
 function updateAndDraw(balls) {
     "use strict";
+    general.numberOfFrames++;
     var i;
     for (i = 0; i < balls.length; i += 1) {
         balls[i] = updateBall(balls[i],balls);
@@ -250,11 +257,12 @@ function updateAndDraw(balls) {
     }
 
     for (i = 0; i < balls.length; i += 1) {
-        if(balls[i].touchesWall||balls[i].touchesTrail){
+        if(balls[i].touchesWall && general.numberOfFrames>300||balls[i].touchesTrail){
             Game.state = "lost";
             window.requestAnimationFrame(function () {
-                drawMenu("lost");
+                drawMenu("lost",i);
             });
+            return;
         }
     }
     window.requestAnimationFrame(function () {
