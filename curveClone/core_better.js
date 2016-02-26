@@ -1,7 +1,7 @@
 /*
- 
- 
- 
+
+
+
  */
 
 /*global window */
@@ -30,9 +30,9 @@ var dictKeys = {
     67: [3, 1] //c
 };
 
-var used = [];
+// var used = [];
 
-document.addEventListener("click", function() {
+document.addEventListener("click", function () {
     doClick();
 }, false);
 document.addEventListener("mousemove", doMouseMove, false);
@@ -96,7 +96,7 @@ function drawMenu(name) {
             tColor: "rgb(1,1,1)",
             hoverColor: 'rgba(122,122,122,0.5)',
             normalColor: 'rgba(122,122,122,0.1)',
-            action: function() {
+            action: function () {
                 Game.state = "game";
             }
         });
@@ -113,7 +113,7 @@ function drawMenu(name) {
             tColor: "rgb(1,1,1)",
             hoverColor: 'rgba(122,122,122,0.5)',
             normalColor: 'rgba(122,122,122,0.1)',
-            action: function() {
+            action: function () {
                 if (general.numberOfPlayers < 4) {
                     general.numberOfPlayers++;
                 }
@@ -132,7 +132,7 @@ function drawMenu(name) {
             tColor: "rgb(1,1,1)",
             hoverColor: 'rgba(122,122,122,0.5)',
             normalColor: 'rgba(122,122,122,0.1)',
-            action: function() {
+            action: function () {
                 if (general.numberOfPlayers > 1) {
                     general.numberOfPlayers--;
                 }
@@ -150,7 +150,7 @@ function drawMenu(name) {
         Game.ctx.fillText(" " + general.numberOfPlayers, Game.canvas.width / 2, Game.canvas.height / 2);
 
         for (var i = 0; i < butts.length; i++) {
-            updateButton(butts[2-i]);
+            updateButton(butts[2 - i]);
         }
         for (var j = 0; j < butts.length; j++) {
             drawButton(butts[j]);
@@ -164,14 +164,14 @@ function drawMenu(name) {
 
     if (Game.state == "begin") {
         mouse.clicked = false;
-        window.requestAnimationFrame(function() {
+        window.requestAnimationFrame(function () {
             drawMenu("beginMenu");
         });
     } else if (Game.state == "lost") {
         mouse.clicked = false;
         drawMenu("lost");
         return;
-    } else if (state == "begin") {
+    } else if (Game.state == "game") {
         Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
         startGame(general.numberOfPlayers);
     }
@@ -181,8 +181,10 @@ function drawMenu(name) {
 function updateButton(butt) {
     if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && !mouse.clicked) {
         butt.color = butt.hoverColor;
-    } else if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && !mouse.clicked) {
+        console.log("Hovering button "+ butt.text);
+    } else if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && mouse.clicked) {
         butt.action();
+        console.log("Clicked Button" + butt.text);
     } else {
         butt.color = butt.normalColor;
     }
@@ -203,10 +205,10 @@ function startGame(nPlayers) {
     "use strict";
     var balls = createBalls(nPlayers);
 
-    document.addEventListener("keydown", function(e) {
+    document.addEventListener("keydown", function (e) {
         keyDownHandler(e, balls);
     }, false);
-    document.addEventListener("keyup", function(e) {
+    document.addEventListener("keyup", function (e) {
         keyUpHandler(e, balls);
     }, false);
 
@@ -256,7 +258,6 @@ function createRandBall() {
 
 function updateAndDraw(balls) {
     "use strict";
-    general.numberOfFrames++;
     var i;
     for (i = 0; i < balls.length; i += 1) {
         balls[i] = updateBall(balls[i], balls);
@@ -264,24 +265,24 @@ function updateAndDraw(balls) {
     for (i = 0; i < balls.length; i += 1) {
         drawBall(balls[i]);
     }
-    var lostF = function() {
+    var lostF = function () {
         drawMenu("lost");
     };
     for (i = 0; i < balls.length; i += 1) {
-        if(balls[i].touchesWall && general.numberOfFrames>300||balls[i].touchesTrail){
+        if (balls[i].touchesWall && general.numberOfFrames > 300 || balls[i].touchesTrail) {
             Game.state = "lost";
             window.requestAnimationFrame(lostF);
             return;
         }
     }
-    window.requestAnimationFrame(function() {
+    window.requestAnimationFrame(function () {
         updateAndDraw(balls);
         Game.frames += 1;
 
     });
 }
 
-function updateBall(ball, balls) {
+function updateBall(ball) {
     "use strict";
     if (ball.framesToHole > 0) {
         ball.framesToHole--;
@@ -345,15 +346,14 @@ function drawBall(ball) {
 }
 
 
-
 //Helper functions
 
 function touchWalls(ball) {
     "use strict";
     return (ball.x <= ball.r ||
-        ball.x >= Game.canvas.width - ball.r ||
-        ball.y <= ball.r ||
-        ball.y >= Game.canvas.height - ball.r);
+    ball.x >= Game.canvas.width - ball.r ||
+    ball.y <= ball.r ||
+    ball.y >= Game.canvas.height - ball.r);
 }
 
 
@@ -366,10 +366,9 @@ function touchTrail(ball, dx, dy) {
     //Get the Alpha value [r, g, b, a]
     //Alpha will be 255 if solid colour
     var DELTA = 4;
-    if ((pixelData[0] || pixelData[1] || pixelData[2]) &&
-        !(Math.abs(pixelData[0] - Game.holeColor[0]) < DELTA && // Hole color check
-            Math.abs(pixelData[1] - Game.holeColor[2]) < DELTA &&
-            Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA)) {
+    if ((pixelData[0] || pixelData[1] || pixelData[2]) && !(Math.abs(pixelData[0] - Game.holeColor[0]) < DELTA && // Hole color check
+        Math.abs(pixelData[1] - Game.holeColor[2]) < DELTA &&
+        Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA)) {
         console.log(pixelData[0], pixelData[1], pixelData[2], pixelData[3]);
         console.log(dx, dy);
 
@@ -392,16 +391,16 @@ function radToCoords(rad) {
     };
 }
 
-function addPlayer(name,players){
+function addPlayer(name, players) {
     players.push({
         name: name,
-        color: "rgba("+Math.floor(Math.random()*256)+","+Math.floor(Math.random()*256)+","+Math.floor(Math.random()*256)+",1)",
-        score:0
+        color: "rgba(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ",1)",
+        score: 0
     });
 }
 
 
-(function() {
+(function () {
     "use strict";
     // Sets everything in motion
     Game.canvas = document.getElementById("myCanvas");
