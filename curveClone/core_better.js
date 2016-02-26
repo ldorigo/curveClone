@@ -5,6 +5,7 @@ var general = {
     numberOfPlayers: 4,
     numberOfFrames:0
 };
+var players=[];
 var mouse = {
     x: 0,
     y: 0,
@@ -105,6 +106,7 @@ function drawMenu(name) {
             action: function () {
                 if (general.numberOfPlayers < 4) {
                     general.numberOfPlayers++;
+                    addPlayer("player"+numberOfPlayers,players)
                 }
             }
         });
@@ -139,7 +141,7 @@ function drawMenu(name) {
         Game.ctx.fillText(" " + general.numberOfPlayers, Game.canvas.width / 2, Game.canvas.height / 2);
 
         for (var i = 0; i < butts.length; i++) {
-            updateButton(butts[2-i]);
+            updateButton(butts[i]);
         }
         for (var j = 0; j < butts.length; j++) {
             drawButton(butts[j]);
@@ -379,6 +381,13 @@ function radToCoords(rad) {
     };
 }
 
+function addPlayer(name,players){
+    players.push({
+        name: name,
+        color: "rgba("+Math.floor(Math.random()*256)+","+Math.floor(Math.random()*256)+","+Math.floor(Math.random()*256)+",1)",
+        score:0
+    };
+}
 
 (function () {
     "use strict";
