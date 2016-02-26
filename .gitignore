@@ -1,2 +1,13 @@
 *.sublime-project
 *.sublime-workspace
+curveClone/.idea/curveClone.iml
+
+curveClone/.idea/.name
+
+*.xml
+
+img/ball.png
+
+js/phaser.min.js
+
+phaserGame.html
