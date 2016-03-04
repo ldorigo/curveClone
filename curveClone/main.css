@@ -4,8 +4,33 @@
 }
 
 canvas {
+    z-index: -1;
     background: rgba(0,0,0,0);
     display: block;
     border: 1px solid black;
     margin: 0 auto;
+}
+
+#playersText {
+    padding-left:80px;
+    font-size: 26px;
+
+}
+#playersInput {
+    padding-left:80px;
+    font-size: 20px;
+}
+input{
+    font-size:20px;
+}
+
+#playersFirstLine {
+
+    margin-bottom: 40px;
+}
+
+#startButton{
+
+    font-size: 35px;
+
 }
