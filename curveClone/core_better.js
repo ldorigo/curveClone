@@ -32,9 +32,10 @@ var dictKeys = {
 
 function keyDownHandler(e, balls) {
     "use strict";
-    e.preventDefault();
     if (e.keyCode in dictKeys) {
         var moveD = dictKeys[e.keyCode];
+        e.preventDefault();
+
         if(!balls[moveD[0]])
             return ;
         if (moveD[1] == 1) {
@@ -47,9 +48,9 @@ function keyDownHandler(e, balls) {
 
 function keyUpHandler(e, balls) {
     "use strict";
-    e.preventDefault();
     if (e.keyCode in dictKeys) {
         var moveD = dictKeys[e.keyCode];
+        e.preventDefault();
         if(!balls[moveD[0]])
             return ;
         if (moveD[1] == 1) {
