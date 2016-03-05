@@ -1,8 +1,3 @@
-/*
-
-
-
- */
 
 /*global window */
 // ^^ Comment for jsLint
@@ -34,10 +29,14 @@ function keyDownHandler(e, balls) {
     "use strict";
     if (e.keyCode in dictKeys) {
         var moveD = dictKeys[e.keyCode];
+        e.preventDefault();
+
+        if(!balls[moveD[0]])
+            return ;
         if (moveD[1] == 1) {
             balls[moveD[0]].rightPressed = true;
         } else {
-            balls[dictKeys[e.keyCode][0]].leftPressed = true;
+            balls[moveD[0]].leftPressed = true;
         }
     }
 }
@@ -46,10 +45,13 @@ function keyUpHandler(e, balls) {
     "use strict";
     if (e.keyCode in dictKeys) {
         var moveD = dictKeys[e.keyCode];
+        e.preventDefault();
+        if(!balls[moveD[0]])
+            return ;
         if (moveD[1] == 1) {
             balls[moveD[0]].rightPressed = false;
         } else {
-            balls[dictKeys[e.keyCode][0]].leftPressed = false;
+            balls[moveD[0]].leftPressed = false;
         }
     }
 }
@@ -383,10 +385,11 @@ function touchTrail(ball, dx, dy) {
     "use strict";
 
     // Grab the pixel data at the current x y coords: i'm sure flash has an equivalent function //
-    var pixelData = Game.ctx.getImageData(Math.floor(ball.x + dx * 3), Math.floor(ball.y + dy * 3), 1, 1).data;
+
+    var pixelData = Game.ctx.getImageData(ball.x + dx*3.01 , ball.y + dy*3.01, 1, 1).data;
     //Get the Alpha value [r, g, b, a]
     //Alpha will be 255 if solid colour
-    var DELTA = 4;
+    var DELTA = 10;
     if ((pixelData[0] || pixelData[1] || pixelData[2]) && !(Math.abs(pixelData[0] - Game.holeColor[0]) < DELTA && // Hole color check
         Math.abs(pixelData[1] - Game.holeColor[1]) < DELTA &&
         Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA))
