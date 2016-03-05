@@ -9,7 +9,7 @@
 var Game = {
     state: 'begin',
     frames: 0,
-    holeColor: [200, 200, 200, 1],
+    holeColor: [200, 200, 200, 50],
     players: []
 
 };
@@ -71,7 +71,7 @@ function drawMenu(name) {
         startButton.style.top = window.getComputedStyle(menuContainer).top;
         startButton.style.left = Game.canvas.offsetLeft + 400 + "px";
 
-        startButton.addEventListener("click",startGameButton,false)
+        startButton.addEventListener("click",startGameButton,false);
 
         Game.ctx.fillStyle = "rgb(1,1,1)";
         Game.ctx.font = "100px serif";
@@ -292,7 +292,7 @@ function updateAndDraw(balls) {
         drawMenu("lost");
     };
     for (i = 0; i < balls.length; i += 1) {
-        if (balls[i].touchesWall && Game.frames > 300 || balls[i].touchesTrail) {
+        if (balls[i].touchesWall && Game.frames > 300 || balls[i].touchesTrail&&Game.frames>50) {
             Game.state = "lost";
             window.requestAnimationFrame(lostF);
             return;
@@ -330,15 +330,15 @@ function updateBall(ball) {
         ball.touchesWall = true;
     }
 
-    if (Game.frames > 2 && touchTrail(ball, dx, dy)) {
+    if (Game.frames > 150 && touchTrail(ball, dx, dy)) {
         ball.touchesTrail = true;
     }
 
     ball.oldX = ball.x;
     ball.oldY = ball.y;
 
-    ball.x += dx;
-    ball.y += dy;
+    ball.x = ball.x+dx;
+    ball.y = ball.y+dy;
     if (!ball.hole) {
 
         ball.counter++;
@@ -381,18 +381,23 @@ function touchWalls(ball) {
 
 function touchTrail(ball, dx, dy) {
     "use strict";
-    if (ball.hole)
-        return false; // Fast check
+
     // Grab the pixel data at the current x y coords: i'm sure flash has an equivalent function //
-    var pixelData = Game.ctx.getImageData(ball.x + dx * 3, ball.y + dy * 3, 1, 1).data;
+    var pixelData = Game.ctx.getImageData(Math.floor(ball.x + dx * 3), Math.floor(ball.y + dy * 3), 1, 1).data;
     //Get the Alpha value [r, g, b, a]
     //Alpha will be 255 if solid colour
     var DELTA = 4;
     if ((pixelData[0] || pixelData[1] || pixelData[2]) && !(Math.abs(pixelData[0] - Game.holeColor[0]) < DELTA && // Hole color check
-        Math.abs(pixelData[1] - Game.holeColor[2]) < DELTA &&
-        Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA)) {
-        console.log(pixelData[0], pixelData[1], pixelData[2], pixelData[3]);
-        console.log(dx, dy);
+        Math.abs(pixelData[1] - Game.holeColor[1]) < DELTA &&
+        Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA))
+
+    {
+        console.log("x: " + Math.floor(ball.x + dx * 3) + " y:  " + Math.floor(ball.y + dy * 3));
+        console.log(Game.ctx.getImageData(Math.floor(ball.x + dx * 3), Math.floor(ball.y + dy * 3), 1, 1).data);
+        console.log("dx, dy:" +dx, dy);
+
+        console.log("touched trail");
+
 
         return true;
     } else {
