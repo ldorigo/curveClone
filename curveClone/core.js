@@ -47,10 +47,12 @@ function keyDownHandler(e, balls) {
     "use strict";
     if (e.keyCode in dictKeys) {
         var moveD = dictKeys[e.keyCode];
+        if(!balls[moveD])
+            return ;
         if (moveD[1] == 1) {
             balls[moveD[0]].rightPressed = true;
         } else {
-            balls[dictKeys[e.keyCode][0]].leftPressed = true;
+            balls[moveD[0]].leftPressed = true;
         }
     }
 }
@@ -59,10 +61,12 @@ function keyUpHandler(e, balls) {
     "use strict";
     if (e.keyCode in dictKeys) {
         var moveD = dictKeys[e.keyCode];
+        if(!balls[moveD])
+            return ;
         if (moveD[1] == 1) {
             balls[moveD[0]].rightPressed = false;
         } else {
-            balls[dictKeys[e.keyCode][0]].leftPressed = false;
+            balls[moveD[0]].leftPressed = false;
         }
     }
 }
