@@ -4,7 +4,7 @@
 var Game = {
     state: 'begin',
     frames: 0,
-    holeColor: [200, 200, 200, 50],
+    holeColor: [200, 200, 200, 1],
     players: []
 
 };
@@ -81,8 +81,9 @@ function drawMenu(name) {
             "", Game.canvas.width / 2 - Game.ctx.measureText("CurveClone").width / 2, Game.canvas.height / 4);
 
 
-        printPlayers();
-
+        if (document.getElementById("playersText").childElementCount < Game.players.length) {
+            printPlayers();
+        }
         if (document.getElementById("playersInput").childElementCount < 1 && Game.players.length < 4) {
             addPlayerLine();
         }
@@ -109,10 +110,10 @@ function drawMenu(name) {
     }
 
 }
-function addButtonClick(name, div) {
+function addButtonClick(name) {
     var input = document.getElementById("nameInput");
 
-    if (input.value.length > 3 && input.value.length < 12 && Game.players.length<5) {
+    if (input.value.length > 3 && input.value.length < 12 && Game.players.length<4) {
         addPlayer(name);
         input.value = "";
         clearNode(document.getElementById("playersInput"));
@@ -129,30 +130,24 @@ function addPlayer(name) {
         });
     }
 }
+
 function printPlayers() {    //print one player per line
 
     var lines = document.getElementById("playersText");
     lines.style.fontSize = "24px";
 
-    while (lines.firstChild) { // clear previously made lines
-        lines.removeChild(lines.firstChild);
-    }
+    clearNode(lines); //remove previously drawn lines
 
     for (var i = 0; i < Game.players.length; i++) {
 
-
         var line = document.createElement("p");
         lines.appendChild(line);
-
         var bullet = document.createElement('em');
         bullet.setAttribute('id', "bull" + i);
         line.appendChild(bullet);
         bullet.appendChild(document.createTextNode("•  "));
-
         var colorBall = document.getElementById("bull" + i);
-
         colorBall.style.color = Game.players[i].color;
-
         var name = document.createTextNode(Game.players[i].name);
         line.appendChild(name);
 
@@ -174,15 +169,12 @@ function printPlayers() {    //print one player per line
         lines.appendChild(line);
 
     }
-
-
 }
 function addPlayerLine() {
     if (Game.players.length < 4) {
         var div = document.getElementById("playersInput");
 
         var form = document.createElement("form");
-
         var inputText = document.createElement("input");
         inputText.setAttribute("type", "text");
         inputText.setAttribute("placeholder", "Choose Name");
@@ -193,7 +185,9 @@ function addPlayerLine() {
         addButton.setAttribute("type", "button");
         addButton.setAttribute("value", "Add Player");
         addButton.setAttribute("id", "addPlayer");
+
         form.appendChild(addButton);
+
         inputText.style.zIndex = "2";
         addButton.style.marginLeft = "25px";
         div.appendChild(form);
@@ -216,12 +210,12 @@ function addPlayerLine() {
 
 function startGameButton(){
 
-    var menu = document.getElementById("beginMenu");
-
-    menu.style.display="none";
-
-    Game.state="game";
-
+    // if there's at least one player, clear the menu and start the game
+    if(Game.players.length>0) {
+        var menu = document.getElementById("beginMenu");
+        menu.style.display = "none";
+        Game.state = "game";
+    }
 
 
 }
@@ -230,6 +224,8 @@ function startGameButton(){
 function startGame() {
     "use strict";
     var balls = createBalls();
+
+    // start listening for key movement
 
     document.addEventListener("keydown", function (e) {
         keyDownHandler(e, balls);
@@ -246,8 +242,8 @@ function createBalls() {
     "use strict";
     // Returns an array of Ball objects
     var balls = [];
-    for (var player in Game.players) {
-        balls.push(createRandBall(Game.players[player].color));
+    for (var i= 0;i<Game.players.length;i++) {
+        balls.push(createRandBall(Game.players[i].color));
     }
     return balls;
 }
@@ -260,8 +256,6 @@ function createRandBall(color) {
     return {
         x: Math.floor((1 - perc) / 2 * w + Math.random() * w * perc),
         y: Math.floor((1 - perc) / 2 * h + Math.random() * h * perc),
-        oldX: 0,
-        oldY: 0,
         r: 3,
         dir: Math.random() * (Math.PI * 2),
         dx: 1,
@@ -275,7 +269,6 @@ function createRandBall(color) {
         hole: false,
         framesToHole: Math.floor(Math.random() * 100 + 15),
         holeStart: 0,
-        counter: 0,
         touchesWall: false,
         touchesTrail: false
     };
@@ -290,11 +283,15 @@ function updateAndDraw(balls) {
     for (i = 0; i < balls.length; i += 1) {
         drawBall(balls[i]);
     }
+
+    //TODO: Change this
+
     var lostF = function () {
         drawMenu("lost");
     };
+
     for (i = 0; i < balls.length; i += 1) {
-        if (balls[i].touchesWall && Game.frames > 300 || balls[i].touchesTrail&&Game.frames>50) {
+        if (balls[i].touchesWall || balls[i].touchesTrail) {
             Game.state = "lost";
             window.requestAnimationFrame(lostF);
             return;
@@ -309,11 +306,17 @@ function updateAndDraw(balls) {
 
 function updateBall(ball) {
     "use strict";
+
+    // If the number of frames before next hole is 0, hole as true. Otherwise decrement.
+
     if (ball.framesToHole > 0) {
         ball.framesToHole--;
     } else {
         ball.hole = true;
     }
+
+    // adjust dx and dy in function of pressed key
+
     if (ball.rightPressed) {
         ball.dir += Math.PI * ball.speed / 100;
     }
@@ -325,26 +328,27 @@ function updateBall(ball) {
         dy = coords.dy,
         dxdy = Math.abs(dx) + Math.abs(dy);
 
+    // check that the dx/dy match the speed
     dx = dx * ball.speed / dxdy;
     dy = dy * ball.speed / dxdy;
 
-    if (Game.frames > 500 && touchWalls(ball)) {
+    // check if the ball is outside the frames (short buffer in the beginning)
+    if (Game.frames > 300 && touchWalls(ball)) {
         ball.touchesWall = true;
     }
 
+    // check if the ball touches a trail
     if (Game.frames > 150 && touchTrail(ball, dx, dy)) {
         ball.touchesTrail = true;
     }
 
-    ball.oldX = ball.x;
-    ball.oldY = ball.y;
+    // update the ball's coordinates
 
     ball.x = ball.x+dx;
     ball.y = ball.y+dy;
-    if (!ball.hole) {
 
-        ball.counter++;
-    } else {
+    // if in hole state, update a counter until the hole finishes
+    if (ball.hole) {
         ball.holeStart++;
         if (ball.holeStart == 15) {
             ball.hole = false;
@@ -379,29 +383,28 @@ function touchWalls(ball) {
     ball.x >= Game.canvas.width - ball.r ||
     ball.y <= ball.r ||
     ball.y >= Game.canvas.height - ball.r);
+    // Check if the ball coordinates are inside the canvas coordinates
 }
 
 function touchTrail(ball, dx, dy) {
     "use strict";
 
-    // Grab the pixel data at the current x y coords: i'm sure flash has an equivalent function //
+    // Grab the pixel data at the current x y coordinates: i'm sure flash has an equivalent function //
 
     var pixelData = Game.ctx.getImageData(ball.x + dx*3.01 , ball.y + dy*3.01, 1, 1).data;
-
     //Get the Alpha value [r, g, b, a]
     //Alpha will be 255 if solid colour
-    var DELTA = 10;
-    if ((pixelData[0] || pixelData[1] || pixelData[2]) && !(Math.abs(pixelData[0] - Game.holeColor[0]) < DELTA && // Hole color check
-        Math.abs(pixelData[1] - Game.holeColor[1]) < DELTA &&
-        Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA))
 
-    {
+    var DELTA = 10;
+    if ((pixelData[0] || pixelData[1] || pixelData[2]) &&  //check if the color is white
+        !(Math.abs(pixelData[0] - Game.holeColor[0]) < DELTA && // ... and if the color doesn't correspond to a hole
+        Math.abs(pixelData[1] - Game.holeColor[1]) < DELTA &&
+        Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA)) {
+        //debugging stuff
         console.log("x: " + Math.floor(ball.x + dx * 3) + " y:  " + Math.floor(ball.y + dy * 3));
         console.log(Game.ctx.getImageData(Math.floor(ball.x + dx * 3), Math.floor(ball.y + dy * 3), 1, 1).data);
         console.log("dx, dy:" +dx, dy);
-
         console.log("touched trail");
-
 
         return true;
     } else {
@@ -409,11 +412,10 @@ function touchTrail(ball, dx, dy) {
     }
 
 }
-function distance(x1, x2, y1, y2) { // Compute distance between 2 points
+/*function distance(x1, x2, y1, y2) { // Compute distance between 2 points
     "use strict";
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-}
-
+}*/
 function radToCoords(rad) {
     "use strict";
     return {
@@ -424,6 +426,7 @@ function radToCoords(rad) {
 
 function clearNode(node){
 
+    //remove the first child of the node until it hasn't got anymore
     while(node.firstChild){
         node.removeChild(node.firstChild);
     }
