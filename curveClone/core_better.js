@@ -387,6 +387,7 @@ function touchTrail(ball, dx, dy) {
     // Grab the pixel data at the current x y coords: i'm sure flash has an equivalent function //
 
     var pixelData = Game.ctx.getImageData(ball.x + dx*3.01 , ball.y + dy*3.01, 1, 1).data;
+
     //Get the Alpha value [r, g, b, a]
     //Alpha will be 255 if solid colour
     var DELTA = 10;
