@@ -1,45 +1,27 @@
+
 /*global window */
 // ^^ Comment for jsLint
 var Game = {
     state: 'begin',
     frames: 0,
-    holeColor: [200, 200, 200, 1]
+    holeColor: [200, 200, 200, 50],
+    players: []
+
 };
-var general = {
-    numberOfPlayers: 4
-};
-var mouse = {
-    x: 0,
-    y: 0,
-    clicked: false
-};
+
 var dictKeys = {
-    37: [0, -1], //Left Arrow
-    39: [0, 1], //Right Arrow
-    68: [1, 1], //d
-    83: [1, -1], //s
-    66: [2, -1], //b
-    78: [2, 1], //n
-    88: [3, -1], //x
-    67: [3, 1] //c
+    37: [0, -1, "Left"], //Left Arrow
+    39: [0, 1, "Right"], //Right Arrow
+    68: [1, 1, "d"], //d
+    83: [1, -1, "s"], //s
+    66: [2, -1, "b"], //b
+    78: [2, 1, "n"], //n
+    88: [3, -1, "x"], //x
+    67: [3, 1, "c"] //c
 };
 
 // var used = [];
 
-document.addEventListener("click", function() {
-    doClick();
-}, false);
-document.addEventListener("mousemove", doMouseMove, false);
-
-function doClick() {
-    "use strict";
-    mouse.clicked = true;
-}
-
-function doMouseMove(e) {
-    mouse.x = e.pageX - Game.canvas.offsetLeft;
-    mouse.y = e.pageY;
-}
 
 // Using "keyCode" instead of "Key" for Chrome support. Not ideal since it's deprecate. To improve in the future.
 
@@ -47,7 +29,9 @@ function keyDownHandler(e, balls) {
     "use strict";
     if (e.keyCode in dictKeys) {
         var moveD = dictKeys[e.keyCode];
-        if(!balls[moveD])
+        e.preventDefault();
+
+        if(!balls[moveD[0]])
             return ;
         if (moveD[1] == 1) {
             balls[moveD[0]].rightPressed = true;
@@ -61,7 +45,8 @@ function keyUpHandler(e, balls) {
     "use strict";
     if (e.keyCode in dictKeys) {
         var moveD = dictKeys[e.keyCode];
-        if(!balls[moveD])
+        e.preventDefault();
+        if(!balls[moveD[0]])
             return ;
         if (moveD[1] == 1) {
             balls[moveD[0]].rightPressed = false;
@@ -76,84 +61,35 @@ function keyUpHandler(e, balls) {
 function drawMenu(name) {
     if (name == "beginMenu") {
 
-        Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
-        // Make and draw butts
+        var menuContainer = document.getElementById("playersDiv");
+        menuContainer.style.top = Game.canvas.height / 2.5 + "px";
+        menuContainer.style.left = Game.canvas.offsetLeft + Game.canvas.width / 8 + "px";
+        menuContainer.style.fontSize = "44px";
+        menuContainer.style.position = "absolute";
 
-        var butts = [];
-        butts.push({
-            rX: (Game.canvas.width / 2),
-            rY: Game.canvas.height / 2 + 15,
-            W: Game.ctx.measureText("Start Game!").width + 6,
-            H: 45,
-            text: "Start Game!",
-            fontsize: '35pt',
-            tX: Game.canvas.width / 2,
-            tY: Game.canvas.height / 2 + 15 + 45,
-            color: 'rgba(122,122,122,0.1)',
-            tColor: "rgb(1,1,1)",
-            hoverColor: 'rgba(122,122,122,0.5)',
-            normalColor: 'rgba(122,122,122,0.1)',
-            action: function() {
-                Game.state = "game";
-            }
-        });
-        butts.push({
-            rX: (Game.canvas.width / 2) + 25 + 45 + 6 + 10,
-            rY: Game.canvas.height / 2 - 45 + 3,
-            W: 45,
-            H: 45,
-            text: "+",
-            fontSize: '35pt',
-            tX: Game.canvas.width / 2 + 25 + 3 + 45 + 6 + 10,
-            tY: Game.canvas.height / 2,
-            color: 'rgba(122,122,122,0.1)',
-            tColor: "rgb(1,1,1)",
-            hoverColor: 'rgba(122,122,122,0.5)',
-            normalColor: 'rgba(122,122,122,0.1)',
-            action: function() {
-                if (general.numberOfPlayers < 4) {
-                    general.numberOfPlayers++;
-                }
-            }
-        });
-        butts.push({
-            rX: (Game.canvas.width / 2) + 25,
-            rY: Game.canvas.height / 2 - 45 + 3,
-            W: 45,
-            H: 45,
-            text: "-",
-            fontSize: "35pt",
-            tX: Game.canvas.width / 2 + 25 + 8,
-            tY: Game.canvas.height / 2,
-            color: 'rgba(122,122,122,0.1)',
-            tColor: "rgb(1,1,1)",
-            hoverColor: 'rgba(122,122,122,0.5)',
-            normalColor: 'rgba(122,122,122,0.1)',
-            action: function() {
-                if (general.numberOfPlayers > 1) {
-                    general.numberOfPlayers--;
-                }
-            }
-        });
+        var startButton = document.getElementById("startButtonContainer");
+        startButton.style.position="absolute";
+        startButton.style.top = window.getComputedStyle(menuContainer).top;
+        startButton.style.left = Game.canvas.offsetLeft + 400 + "px";
+
+        startButton.addEventListener("click",startGameButton,false);
 
         Game.ctx.fillStyle = "rgb(1,1,1)";
         Game.ctx.font = "100px serif";
         Game.ctx.fillText("CurveClone" +
-            "", Game.canvas.width / 2 - Game.ctx.measureText("Select number of players: ").width, Game.canvas.height / 2);
+            "", Game.canvas.width / 2 - Game.ctx.measureText("CurveClone").width / 2, Game.canvas.height / 4);
 
-        Game.ctx.fillStyle = "rgb(1,1,1)";
-        Game.ctx.font = "24px serif";
-        Game.ctx.fillText("Select number of players: ", Game.canvas.width / 2 - Game.ctx.measureText("Select number of players: ").width, Game.canvas.height / 2);
-        Game.ctx.fillText(" " + general.numberOfPlayers, Game.canvas.width / 2, Game.canvas.height / 2);
 
-        for (var i = 0; i < butts.length; i++) {
-            updateButton(butts[2 - i]);
+        printPlayers();
+
+        if (document.getElementById("playersInput").childElementCount < 1 && Game.players.length < 4) {
+            addPlayerLine();
         }
-        for (var j = 0; j < butts.length; j++) {
-            drawButton(butts[j]);
-        }
-    } else if (name == "lost") {
+
+
+    }
+    else if (name == "lost") {
         Game.ctx.fillStyle = "rgb(1,1,1)";
         Game.ctx.font = "44px serif";
         Game.ctx.fillText("Game Over!", Game.canvas.width / 2 - Game.ctx.measureText("Game Over!").width, Game.canvas.height / 2);
@@ -161,52 +97,144 @@ function drawMenu(name) {
     }
 
     if (Game.state == "begin") {
-        mouse.clicked = false;
-        window.requestAnimationFrame(function() {
+        window.requestAnimationFrame(function () {
             drawMenu("beginMenu");
         });
     } else if (Game.state == "lost") {
-        mouse.clicked = false;
         drawMenu("lost");
-        return;
+
     } else if (Game.state == "game") {
         Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
-        startGame(general.numberOfPlayers);
+        startGame();
     }
 
 }
+function addButtonClick(name, div) {
+    var input = document.getElementById("nameInput");
 
-function updateButton(butt) {
-    if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && !mouse.clicked) {
-        butt.color = butt.hoverColor;
-        console.log("Hovering button " + butt.text);
-    } else if (mouse.x >= butt.rX && mouse.x <= butt.rX + butt.W && mouse.y >= butt.rY && mouse.y <= butt.rY + butt.H && mouse.clicked) {
-        butt.action();
-        console.log("Clicked Button" + butt.text);
-    } else {
-        butt.color = butt.normalColor;
+    if (input.value.length > 3 && input.value.length < 12 && Game.players.length<5) {
+        addPlayer(name);
+        input.value = "";
+        clearNode(document.getElementById("playersInput"));
+    }
+
+
+}
+function addPlayer(name) {
+    if (Game.players.length < 4) {
+        Game.players.push({
+            name: name,
+            color: "rgba(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ",1)",
+            score: 0
+        });
     }
 }
+function printPlayers() {    //print one player per line
 
-function drawButton(butt) {
-    Game.ctx.beginPath();
-    Game.ctx.font = butt.fontSize;
-    Game.ctx.fillStyle = butt.color;
-    Game.ctx.fillRect(butt.rX, butt.rY, butt.W, butt.H);
-    Game.ctx.fillStyle = butt.tColor;
-    Game.ctx.fillText(butt.text, butt.tX, butt.tY);
-    Game.ctx.closePath();
+    var lines = document.getElementById("playersText");
+    lines.style.fontSize = "24px";
+
+    while (lines.firstChild) { // clear previously made lines
+        lines.removeChild(lines.firstChild);
+    }
+
+    for (var i = 0; i < Game.players.length; i++) {
+
+
+        var line = document.createElement("p");
+        lines.appendChild(line);
+
+        var bullet = document.createElement('em');
+        bullet.setAttribute('id', "bull" + i);
+        line.appendChild(bullet);
+        bullet.appendChild(document.createTextNode("•  "));
+
+        var colorBall = document.getElementById("bull" + i);
+
+        colorBall.style.color = Game.players[i].color;
+
+        var name = document.createTextNode(Game.players[i].name);
+        line.appendChild(name);
+
+        var controlsText = "   (";
+        var counterControls = 0;
+        for (var element in dictKeys) {
+            if (dictKeys[element][0] == i) {
+                controlsText += dictKeys[element][2];
+                counterControls++;
+                controlsText += counterControls == 1 ? "/" : ')';
+            }
+        }
+
+        var controls = document.createElement("em");
+        controls.appendChild(document.createTextNode(controlsText));
+        line.appendChild(controls);
+        controls.style.fontStyle = "italic";
+        controls.style.fontSize = "20px";
+        lines.appendChild(line);
+
+    }
+
+
+}
+function addPlayerLine() {
+    if (Game.players.length < 4) {
+        var div = document.getElementById("playersInput");
+
+        var form = document.createElement("form");
+
+        var inputText = document.createElement("input");
+        inputText.setAttribute("type", "text");
+        inputText.setAttribute("placeholder", "Choose Name");
+        inputText.setAttribute("id", "nameInput");
+        form.appendChild(inputText);
+
+        var addButton = document.createElement("input");
+        addButton.setAttribute("type", "button");
+        addButton.setAttribute("value", "Add Player");
+        addButton.setAttribute("id", "addPlayer");
+        form.appendChild(addButton);
+        inputText.style.zIndex = "2";
+        addButton.style.marginLeft = "25px";
+        div.appendChild(form);
+        inputText.focus();
+
+    }
+
+    addButton.addEventListener("click", function () {
+        addButtonClick(inputText.value, div)
+    }, false);
+    inputText.addEventListener("keypress", function (e) {
+
+        if (e.keyCode == 13) {
+            e.preventDefault();
+            addButtonClick(inputText.value, div);
+        }
+    }, false)
+
+}
+
+function startGameButton(){
+
+    var menu = document.getElementById("beginMenu");
+
+    menu.style.display="none";
+
+    Game.state="game";
+
+
+
 }
 
 // Game functions
-function startGame(nPlayers) {
+function startGame() {
     "use strict";
-    var balls = createBalls(nPlayers);
+    var balls = createBalls();
 
-    document.addEventListener("keydown", function(e) {
+    document.addEventListener("keydown", function (e) {
         keyDownHandler(e, balls);
     }, false);
-    document.addEventListener("keyup", function(e) {
+    document.addEventListener("keyup", function (e) {
         keyUpHandler(e, balls);
     }, false);
 
@@ -214,18 +242,17 @@ function startGame(nPlayers) {
     updateAndDraw(balls);
 }
 
-function createBalls(nPlayers) {
+function createBalls() {
     "use strict";
     // Returns an array of Ball objects
     var balls = [];
-    var i;
-    for (i = 0; i < nPlayers; i += 1) {
-        balls.push(createRandBall());
+    for (var player in Game.players) {
+        balls.push(createRandBall(Game.players[player].color));
     }
     return balls;
 }
 
-function createRandBall() {
+function createRandBall(color) {
     "use strict";
     var w = Game.canvas.width;
     var h = Game.canvas.height;
@@ -240,7 +267,7 @@ function createRandBall() {
         dx: 1,
         dy: 1,
         speed: 2,
-        color: "rgba(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ",1)",
+        color: color,
         trail: [],
         tempTrail: [],
         leftPressed: false,
@@ -263,17 +290,17 @@ function updateAndDraw(balls) {
     for (i = 0; i < balls.length; i += 1) {
         drawBall(balls[i]);
     }
-    var lostF = function() {
+    var lostF = function () {
         drawMenu("lost");
     };
     for (i = 0; i < balls.length; i += 1) {
-        if (balls[i].touchesWall && general.numberOfFrames > 300 || balls[i].touchesTrail) {
+        if (balls[i].touchesWall && Game.frames > 300 || balls[i].touchesTrail&&Game.frames>50) {
             Game.state = "lost";
             window.requestAnimationFrame(lostF);
             return;
         }
     }
-    window.requestAnimationFrame(function() {
+    window.requestAnimationFrame(function () {
         updateAndDraw(balls);
         Game.frames += 1;
 
@@ -305,15 +332,15 @@ function updateBall(ball) {
         ball.touchesWall = true;
     }
 
-    if (Game.frames > 2 && touchTrail(ball, dx, dy)) {
+    if (Game.frames > 150 && touchTrail(ball, dx, dy)) {
         ball.touchesTrail = true;
     }
 
     ball.oldX = ball.x;
     ball.oldY = ball.y;
 
-    ball.x += dx;
-    ball.y += dy;
+    ball.x = ball.x+dx;
+    ball.y = ball.y+dy;
     if (!ball.hole) {
 
         ball.counter++;
@@ -349,26 +376,32 @@ function drawBall(ball) {
 function touchWalls(ball) {
     "use strict";
     return (ball.x <= ball.r ||
-        ball.x >= Game.canvas.width - ball.r ||
-        ball.y <= ball.r ||
-        ball.y >= Game.canvas.height - ball.r);
+    ball.x >= Game.canvas.width - ball.r ||
+    ball.y <= ball.r ||
+    ball.y >= Game.canvas.height - ball.r);
 }
-
 
 function touchTrail(ball, dx, dy) {
     "use strict";
-    if (ball.hole)
-        return false; // Fast check
+
     // Grab the pixel data at the current x y coords: i'm sure flash has an equivalent function //
-    var pixelData = Game.ctx.getImageData(ball.x + dx * 3, ball.y + dy * 3, 1, 1).data;
+
+    var pixelData = Game.ctx.getImageData(ball.x + dx*3.01 , ball.y + dy*3.01, 1, 1).data;
+
     //Get the Alpha value [r, g, b, a]
     //Alpha will be 255 if solid colour
-    var DELTA = 4;
+    var DELTA = 10;
     if ((pixelData[0] || pixelData[1] || pixelData[2]) && !(Math.abs(pixelData[0] - Game.holeColor[0]) < DELTA && // Hole color check
-            Math.abs(pixelData[1] - Game.holeColor[2]) < DELTA &&
-            Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA)) {
-        console.log(pixelData[0], pixelData[1], pixelData[2], pixelData[3]);
-        console.log(dx, dy);
+        Math.abs(pixelData[1] - Game.holeColor[1]) < DELTA &&
+        Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA))
+
+    {
+        console.log("x: " + Math.floor(ball.x + dx * 3) + " y:  " + Math.floor(ball.y + dy * 3));
+        console.log(Game.ctx.getImageData(Math.floor(ball.x + dx * 3), Math.floor(ball.y + dy * 3), 1, 1).data);
+        console.log("dx, dy:" +dx, dy);
+
+        console.log("touched trail");
+
 
         return true;
     } else {
@@ -376,7 +409,6 @@ function touchTrail(ball, dx, dy) {
     }
 
 }
-
 function distance(x1, x2, y1, y2) { // Compute distance between 2 points
     "use strict";
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
@@ -390,16 +422,14 @@ function radToCoords(rad) {
     };
 }
 
-function addPlayer(name, players) {
-    players.push({
-        name: name,
-        color: "rgba(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ",1)",
-        score: 0
-    });
+function clearNode(node){
+
+    while(node.firstChild){
+        node.removeChild(node.firstChild);
+    }
 }
 
-
-(function() {
+(function () {
     "use strict";
     // Sets everything in motion
     Game.canvas = document.getElementById("myCanvas");
@@ -408,3 +438,4 @@ function addPlayer(name, players) {
     drawMenu("beginMenu");
 
 }());
+
