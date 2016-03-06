@@ -226,7 +226,7 @@ function startGameButton(){
 function startGame() {
     "use strict";
     var balls = createBalls();
-    
+
     makeGrid(32);
     // start listening for key movement
 
@@ -418,6 +418,17 @@ function touchTrail(ball, dx, dy) {
 }
 */
 
+function touchTrail(ball){
+
+    for(var coordinate in Game.grid[Math.floor(ball.y/32)][Math.floor(ball.y/32)]){
+        if(distance(ball.x,coordinate[0],ball.y,coordinate[1]) < (ball.r+coordinate[2])){
+            console.log("touched trail");
+            return true;
+        }
+    }
+    return false;
+
+}
 
 
 
