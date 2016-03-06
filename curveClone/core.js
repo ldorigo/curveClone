@@ -228,6 +228,7 @@ function startGame() {
     var balls = createBalls();
 
     makeGrid(32);
+
     // start listening for key movement
 
     document.addEventListener("keydown", function (e) {
@@ -273,7 +274,8 @@ function createRandBall(color) {
         framesToHole: Math.floor(Math.random() * 100 + 15),
         holeStart: 0,
         touchesWall: false,
-        touchesTrail: false
+        touchesTrail: false,
+        counter:0
     };
 }
 
@@ -331,7 +333,8 @@ function updateBall(ball) {
         dy = coords.dy,
         dxdy = Math.abs(dx) + Math.abs(dy);
 
-    // check that the dx/dy match the speed
+    // Make the dx/dy match the speed
+
     dx = dx * ball.speed / dxdy;
     dy = dy * ball.speed / dxdy;
 
@@ -340,8 +343,19 @@ function updateBall(ball) {
         ball.touchesWall = true;
     }
 
+
+    if(!ball.hole){
+        ball.tempTrail = [[ball.x,ball.y,ball.r]].concat(ball.tempTrail);
+        if(ball.tempTrail.length>2*ball.r+1){
+            addToGrid(ball.tempTrail.pop(),32)
+        }
+
+
+    }
+
+
     // check if the ball touches a trail
-    if (Game.frames > 150 && touchTrail(ball, dx, dy)) {
+    if (Game.frames > 15 && touchTrail(ball)) {
         ball.touchesTrail = true;
     }
 
@@ -350,6 +364,7 @@ function updateBall(ball) {
     ball.x = ball.x+dx;
     ball.y = ball.y+dy;
 
+    console.log("current pos: ("+ball.x + ","+ball.y+")");
     // if in hole state, update a counter until the hole finishes
     if (ball.hole) {
         ball.holeStart++;
@@ -418,14 +433,18 @@ function touchTrail(ball, dx, dy) {
 }
 */
 
-function touchTrail(ball){
+function touchTrail(ball){ //Similar to my old collision detection, but only inside the area around the ball
 
-    for(var coordinate in Game.grid[Math.floor(ball.y/32)][Math.floor(ball.y/32)]){
-        if(distance(ball.x,coordinate[0],ball.y,coordinate[1]) < (ball.r+coordinate[2])){
-            console.log("touched trail");
+    var coordinates = Game.grid[Math.floor(ball.y/32)][Math.floor(ball.x/32)];
+    for(var i=0;i<coordinates.length;i++){
+
+        if(distance(ball.x,coordinates[i][0],ball.y,coordinates[i][1]) < (ball.r+coordinates[i][2])){
+            console.log("touched trail, frame:" + Game.frames);
             return true;
         }
     }
+
+
     return false;
 
 }
@@ -463,12 +482,16 @@ function makeGrid(cellSize) {
 }
 
 
-function addToGrid(grid,x,y,r,cellSize){
+function addToGrid(coordinates,cellSize){
 
-    var xGrid = x/cellSize;
-    var yGrid = y/cellSize;
+    var x = coordinates[0];
+    var y = coordinates[1];
+    var r = coordinates[2];
+    var xGrid = Math.floor(x/cellSize);
+    var yGrid = Math.floor(y/cellSize);
 
-    grid[yGrid][xGrid].push([x,y,r]);
+    Game.grid[yGrid][xGrid].push([x,y,r]);
+    console.log("Added coordinates (" + x +","+y+") in cell (" +yGrid + ","+xGrid+")");
 
 }
 
