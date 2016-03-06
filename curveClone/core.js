@@ -5,7 +5,8 @@ var Game = {
     state: 'begin',
     frames: 0,
     holeColor: [200, 200, 200, 1],
-    players: []
+    players: [],
+    scoreChange:true
 
 };
 
@@ -126,7 +127,8 @@ function addPlayer(name) {
         Game.players.push({
             name: name,
             color: "rgba(" + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + "," + Math.floor(Math.random() * 256) + ",1)",
-            score: 0
+            score: 0,
+            state: "normal"
         });
     }
 }
@@ -278,23 +280,23 @@ function updateAndDraw(balls) {
     "use strict";
     var i;
     for (i = 0; i < balls.length; i += 1) {
-        balls[i] = updateBall(balls[i], balls);
+        if(Game.players[i].state == "normal"){
+         balls[i] = updateBall(balls[i], balls);
+        }
     }
     for (i = 0; i < balls.length; i += 1) {
-        drawBall(balls[i]);
+        if(Game.players[i].state == "normal") {
+            drawBall(balls[i]);
+        }
     }
 
     //TODO: Change this
 
-    var lostF = function () {
-        drawMenu("lost");
-    };
+
 
     for (i = 0; i < balls.length; i += 1) {
         if (balls[i].touchesWall || balls[i].touchesTrail) {
-            Game.state = "lost";
-            window.requestAnimationFrame(lostF);
-            return;
+            Game.players[i].state = "lost";
         }
     }
     window.requestAnimationFrame(function () {
@@ -386,12 +388,13 @@ function touchWalls(ball) {
     // Check if the ball coordinates are inside the canvas coordinates
 }
 
+/* Nico's collision detection (buggy)
 function touchTrail(ball, dx, dy) {
     "use strict";
 
     // Grab the pixel data at the current x y coordinates: i'm sure flash has an equivalent function //
 
-    var pixelData = Game.ctx.getImageData(ball.x + dx*3.01 , ball.y + dy*3.01, 1, 1).data;
+    var pixelData = Game.ctx.getImageData(Math.floor(ball.x + dx*(ball.r)) , Math.floor(ball.y + dy*(ball.r)), 1, 1).data; //Math.floor to avoid 2x2array because of non-integer coordinates.
     //Get the Alpha value [r, g, b, a]
     //Alpha will be 255 if solid colour
 
@@ -412,10 +415,14 @@ function touchTrail(ball, dx, dy) {
     }
 
 }
-/*function distance(x1, x2, y1, y2) { // Compute distance between 2 points
-    "use strict";
-    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-}*/
+*/
+
+
+
+
+
+
+
 function radToCoords(rad) {
     "use strict";
     return {
@@ -432,7 +439,33 @@ function clearNode(node){
     }
 }
 
-(function () {
+
+function makeGrid(cellSize) {
+    var grid = [];
+    for (var i = 0; i < Game.canvas.height; i+=cellSize) {
+        grid.push([]);
+        for (var j = 0; j < Game.canvas.width; j+=cellSize) {
+                grid[i / cellSize].push([]);
+        }
+    }
+}
+
+
+function addToGrid(grid,x,y,r,cellSize){
+
+    var xGrid = x/cellSize;
+    var yGrid = y/cellSize;
+
+    grid[yGrid][xGrid].push([x,y,r]);
+
+}
+
+function distance(x1, x2, y1, y2) { // Compute distance between 2 points
+    "use strict";
+    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+}
+
+    (function () {
     "use strict";
     // Sets everything in motion
     Game.canvas = document.getElementById("myCanvas");
