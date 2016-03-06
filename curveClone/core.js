@@ -226,7 +226,8 @@ function startGameButton(){
 function startGame() {
     "use strict";
     var balls = createBalls();
-
+    
+    makeGrid(32);
     // start listening for key movement
 
     document.addEventListener("keydown", function (e) {
@@ -441,11 +442,11 @@ function clearNode(node){
 
 
 function makeGrid(cellSize) {
-    var grid = [];
+    Game.grid = [];
     for (var i = 0; i < Game.canvas.height; i+=cellSize) {
-        grid.push([]);
+        Game.grid.push([]);
         for (var j = 0; j < Game.canvas.width; j+=cellSize) {
-                grid[i / cellSize].push([]);
+                Game.grid[i / cellSize].push([]);
         }
     }
 }
