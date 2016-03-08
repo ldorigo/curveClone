@@ -1,4 +1,3 @@
-
 /*global window */
 // ^^ Comment for jsLint
 var Game = {
@@ -6,7 +5,7 @@ var Game = {
     frames: 0,
     holeColor: [200, 200, 200, 1],
     players: [],
-    scoreChange:true
+    scoreChange: true
 
 };
 
@@ -21,9 +20,6 @@ var dictKeys = {
     67: [3, 1, "c"] //c
 };
 
-// var used = [];
-
-
 // Using "keyCode" instead of "Key" for Chrome support. Not ideal since it's deprecate. To improve in the future.
 
 function keyDownHandler(e, balls) {
@@ -32,8 +28,8 @@ function keyDownHandler(e, balls) {
         var moveD = dictKeys[e.keyCode];
         e.preventDefault();
 
-        if(!balls[moveD[0]])
-            return ;
+        if (!balls[moveD[0]])
+            return;
         if (moveD[1] == 1) {
             balls[moveD[0]].rightPressed = true;
         } else {
@@ -47,8 +43,8 @@ function keyUpHandler(e, balls) {
     if (e.keyCode in dictKeys) {
         var moveD = dictKeys[e.keyCode];
         e.preventDefault();
-        if(!balls[moveD[0]])
-            return ;
+        if (!balls[moveD[0]])
+            return;
         if (moveD[1] == 1) {
             balls[moveD[0]].rightPressed = false;
         } else {
@@ -70,11 +66,11 @@ function drawMenu(name) {
         menuContainer.style.position = "absolute";
 
         var startButton = document.getElementById("startButtonContainer");
-        startButton.style.position="absolute";
+        startButton.style.position = "absolute";
         startButton.style.top = window.getComputedStyle(menuContainer).top;
         startButton.style.left = Game.canvas.offsetLeft + 400 + "px";
 
-        startButton.addEventListener("click",startGameButton,false);
+        startButton.addEventListener("click", startGameButton, false);
 
         Game.ctx.fillStyle = "rgb(1,1,1)";
         Game.ctx.font = "100px serif";
@@ -114,7 +110,7 @@ function drawMenu(name) {
 function addButtonClick(name) {
     var input = document.getElementById("nameInput");
 
-    if (input.value.length > 3 && input.value.length < 12 && Game.players.length<4) {
+    if (input.value.length > 3 && input.value.length < 12 && Game.players.length < 4) {
         addPlayer(name);
         input.value = "";
         clearNode(document.getElementById("playersInput"));
@@ -132,7 +128,6 @@ function addPlayer(name) {
         });
     }
 }
-
 function printPlayers() {    //print one player per line
 
     var lines = document.getElementById("playersText");
@@ -209,11 +204,10 @@ function addPlayerLine() {
     }, false)
 
 }
-
-function startGameButton(){
+function startGameButton() {
 
     // if there's at least one player, clear the menu and start the game
-    if(Game.players.length>0) {
+    if (Game.players.length > 0) {
         var menu = document.getElementById("beginMenu");
         menu.style.display = "none";
         Game.state = "game";
@@ -238,7 +232,7 @@ function startGame() {
         keyUpHandler(e, balls);
     }, false);
 
-
+    printScores();
     updateAndDraw(balls);
 }
 
@@ -246,7 +240,7 @@ function createBalls() {
     "use strict";
     // Returns an array of Ball objects
     var balls = [];
-    for (var i= 0;i<Game.players.length;i++) {
+    for (var i = 0; i < Game.players.length; i++) {
         balls.push(createRandBall(Game.players[i].color));
     }
     return balls;
@@ -275,7 +269,7 @@ function createRandBall(color) {
         holeStart: 0,
         touchesWall: false,
         touchesTrail: false,
-        counter:0
+        counter: 0
     };
 }
 
@@ -283,12 +277,24 @@ function updateAndDraw(balls) {
     "use strict";
     var i;
     for (i = 0; i < balls.length; i += 1) {
-        if(Game.players[i].state == "normal"){
-         balls[i] = updateBall(balls[i], balls);
+        if (Game.players[i].state == "normal") {
+            balls[i] = updateBall(balls[i]);
         }
     }
+
     for (i = 0; i < balls.length; i += 1) {
-        if(Game.players[i].state == "normal") {
+        if (balls[i].touchesWall || balls[i].touchesTrail) {
+            Game.players[i].state = "lost";
+            incrementOtherScores();
+            printScores();
+            balls[i].touchesTrail = false;
+            balls[i].touchesWall = false;
+        }
+    }
+
+    for (i = 0; i < balls.length; i += 1) {
+        if (Game.players[i].state == "normal") {
+
             drawBall(balls[i]);
         }
     }
@@ -297,20 +303,23 @@ function updateAndDraw(balls) {
 
 
 
-    for (i = 0; i < balls.length; i += 1) {
-        if (balls[i].touchesWall || balls[i].touchesTrail) {
-            Game.players[i].state = "lost";
-        }
-    }
     window.requestAnimationFrame(function () {
         updateAndDraw(balls);
         Game.frames += 1;
 
     });
 }
-
+function touchWalls(ball) {
+    console.log("checking wall collision");
+    if(ball.x <= ball.r|| ball.x >= Game.canvas.width - ball.r || ball.y <= ball.r || ball.y >= Game.canvas.height - ball.r){
+        console.log("touched wall");
+        return true;
+    }
+    return false;// Check if the ball coordinates are inside the canvas coordinates
+}
 function updateBall(ball) {
     "use strict";
+
 
     // If the number of frames before next hole is 0, hole as true. Otherwise decrement.
 
@@ -338,33 +347,35 @@ function updateBall(ball) {
     dx = dx * ball.speed / dxdy;
     dy = dy * ball.speed / dxdy;
 
-    // check if the ball is outside the frames (short buffer in the beginning)
-    if (Game.frames > 300 && touchWalls(ball)) {
-        ball.touchesWall = true;
-    }
-
-
-    if(!ball.hole){
-        ball.tempTrail = [[ball.x,ball.y,ball.r]].concat(ball.tempTrail);
-        if(ball.tempTrail.length>2*ball.r+1){
-            addToGrid(ball.tempTrail.pop(),32)
-        }
-
-
-    }
-
 
     // check if the ball touches a trail
     if (Game.frames > 15 && touchTrail(ball)) {
         ball.touchesTrail = true;
+        return ball;
+    }
+
+    var touchWall = touchWalls(ball);
+    // check if the ball is outside the frames (short buffer in the beginning)
+    if (Game.frames > 15 && touchWall) {
+        ball.touchesWall = true;
+        return ball;
     }
 
     // update the ball's coordinates
 
-    ball.x = ball.x+dx;
-    ball.y = ball.y+dy;
+    ball.x = ball.x + dx;
+    ball.y = ball.y + dy;
 
-    console.log("current pos: ("+ball.x + ","+ball.y+")");
+    if (!ball.hole) {
+        ball.tempTrail = [[ball.x, ball.y, ball.r]].concat(ball.tempTrail);
+        if (ball.tempTrail.length > 2 * ball.r + 1) {
+            addToGrid(ball.tempTrail.pop(), 32)
+        }
+    }
+
+
+    // console.log("current pos: ("+ball.x + ","+ball.y+")");
+
     // if in hole state, update a counter until the hole finishes
     if (ball.hole) {
         ball.holeStart++;
@@ -393,55 +404,47 @@ function drawBall(ball) {
 }
 
 
-//Helper functions
-
-function touchWalls(ball) {
-    "use strict";
-    return (ball.x <= ball.r ||
-    ball.x >= Game.canvas.width - ball.r ||
-    ball.y <= ball.r ||
-    ball.y >= Game.canvas.height - ball.r);
-    // Check if the ball coordinates are inside the canvas coordinates
-}
 
 /* Nico's collision detection (buggy)
-function touchTrail(ball, dx, dy) {
-    "use strict";
+ function touchTrail(ball, dx, dy) {
+ "use strict";
 
-    // Grab the pixel data at the current x y coordinates: i'm sure flash has an equivalent function //
+ // Grab the pixel data at the current x y coordinates: i'm sure flash has an equivalent function //
 
-    var pixelData = Game.ctx.getImageData(Math.floor(ball.x + dx*(ball.r)) , Math.floor(ball.y + dy*(ball.r)), 1, 1).data; //Math.floor to avoid 2x2array because of non-integer coordinates.
-    //Get the Alpha value [r, g, b, a]
-    //Alpha will be 255 if solid colour
+ var pixelData = Game.ctx.getImageData(Math.floor(ball.x + dx*(ball.r)) , Math.floor(ball.y + dy*(ball.r)), 1, 1).data; //Math.floor to avoid 2x2array because of non-integer coordinates.
+ //Get the Alpha value [r, g, b, a]
+ //Alpha will be 255 if solid colour
 
-    var DELTA = 10;
-    if ((pixelData[0] || pixelData[1] || pixelData[2]) &&  //check if the color is white
-        !(Math.abs(pixelData[0] - Game.holeColor[0]) < DELTA && // ... and if the color doesn't correspond to a hole
-        Math.abs(pixelData[1] - Game.holeColor[1]) < DELTA &&
-        Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA)) {
-        //debugging stuff
-        console.log("x: " + Math.floor(ball.x + dx * 3) + " y:  " + Math.floor(ball.y + dy * 3));
-        console.log(Game.ctx.getImageData(Math.floor(ball.x + dx * 3), Math.floor(ball.y + dy * 3), 1, 1).data);
-        console.log("dx, dy:" +dx, dy);
-        console.log("touched trail");
+ var DELTA = 10;
+ if ((pixelData[0] || pixelData[1] || pixelData[2]) &&  //check if the color is white
+ !(Math.abs(pixelData[0] - Game.holeColor[0]) < DELTA && // ... and if the color doesn't correspond to a hole
+ Math.abs(pixelData[1] - Game.holeColor[1]) < DELTA &&
+ Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA)) {
+ //debugging stuff
+ console.log("x: " + Math.floor(ball.x + dx * 3) + " y:  " + Math.floor(ball.y + dy * 3));
+ console.log(Game.ctx.getImageData(Math.floor(ball.x + dx * 3), Math.floor(ball.y + dy * 3), 1, 1).data);
+ console.log("dx, dy:" +dx, dy);
+ console.log("touched trail");
 
-        return true;
-    } else {
-        return false;
-    }
+ return true;
+ } else {
+ return false;
+ }
 
-}
-*/
+ }
+ */
 
-function touchTrail(ball){ //Similar to my old collision detection, but only inside the area around the ball
+function touchTrail(ball) { //Similar to my old collision detection, but only inside the area around the ball
 
-    var coordinates = Game.grid[Math.floor(ball.y/32)][Math.floor(ball.x/32)];
-    for(var i=0;i<coordinates.length;i++){
 
-        if(distance(ball.x,coordinates[i][0],ball.y,coordinates[i][1]) < (ball.r+coordinates[i][2])){
+    var coordinates = Game.grid[Math.floor(Math.abs(ball.y / 32))][Math.floor(Math.abs(ball.x / 32))];
+    for (var i = 0; i < coordinates.length; i++) {
+
+        if (distance(ball.x, coordinates[i][0], ball.y, coordinates[i][1]) < (ball.r + coordinates[i][2])) {
             console.log("touched trail, frame:" + Game.frames);
             return true;
         }
+
     }
 
 
@@ -449,10 +452,28 @@ function touchTrail(ball){ //Similar to my old collision detection, but only ins
 
 }
 
+function makeGrid(cellSize) {
+    Game.grid = [];
+    for (var i = 0; i < Game.canvas.height+cellSize; i += cellSize) {
+        Game.grid.push([]);
+        for (var j = 0; j < Game.canvas.width+cellSize; j += cellSize) {
+            Game.grid[i / cellSize].push([]);
+        }
+    }
+}
 
+function addToGrid(coordinates, cellSize) {
 
+    var x = Math.abs(coordinates[0]);
+    var y = Math.abs(coordinates[1]);
+    var r = coordinates[2];
+    var xGrid = Math.floor(x / cellSize);
+    var yGrid = Math.floor(y / cellSize);
 
+    Game.grid[yGrid][xGrid].push([x, y, r]);
+    //console.log("Added coordinates (" + x +","+y+") in cell (" +yGrid + ","+xGrid+")");
 
+}
 
 function radToCoords(rad) {
     "use strict";
@@ -462,36 +483,56 @@ function radToCoords(rad) {
     };
 }
 
-function clearNode(node){
+function clearNode(node) {
 
     //remove the first child of the node until it hasn't got anymore
-    while(node.firstChild){
+    while (node.firstChild) {
         node.removeChild(node.firstChild);
     }
 }
 
+function printScores() {
 
-function makeGrid(cellSize) {
-    Game.grid = [];
-    for (var i = 0; i < Game.canvas.height; i+=cellSize) {
-        Game.grid.push([]);
-        for (var j = 0; j < Game.canvas.width; j+=cellSize) {
-                Game.grid[i / cellSize].push([]);
-        }
+    var scores = document.getElementById("scores");
+
+    clearNode(scores);
+
+    scores.style.position = "absolute";
+    scores.style.top = "80px";
+    scores.style.left = Game.canvas.offsetLeft + Game.canvas.width + 30 + "px";
+
+    for (var i = 0; i < Game.players.length; i++) {
+
+        var line = document.createElement("p");
+        scores.appendChild(line);
+        var bullet = document.createElement('em');
+        bullet.setAttribute('id', "bullScores" + i);
+        line.appendChild(bullet);
+        bullet.appendChild(document.createTextNode("•  "));
+        var colorBall = document.getElementById("bullScores" + i);
+        colorBall.style.color = Game.players[i].color;
+        var name = document.createTextNode(Game.players[i].name);
+        line.appendChild(name);
+
+        var score = document.createTextNode(": " + Game.players[i].score);
+        line.appendChild(score);
+
+        scores.appendChild(line);
+
     }
+
+
 }
 
+function incrementOtherScores() {
 
-function addToGrid(coordinates,cellSize){
+    for (var i = 0; i < Game.players.length; i++) {
 
-    var x = coordinates[0];
-    var y = coordinates[1];
-    var r = coordinates[2];
-    var xGrid = Math.floor(x/cellSize);
-    var yGrid = Math.floor(y/cellSize);
+        if (Game.players[i].state == "normal") {
+            Game.players[i].score++;
+        }
 
-    Game.grid[yGrid][xGrid].push([x,y,r]);
-    console.log("Added coordinates (" + x +","+y+") in cell (" +yGrid + ","+xGrid+")");
+    }
 
 }
 
@@ -500,7 +541,7 @@ function distance(x1, x2, y1, y2) { // Compute distance between 2 points
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
 
-    (function () {
+(function () {
     "use strict";
     // Sets everything in motion
     Game.canvas = document.getElementById("myCanvas");
