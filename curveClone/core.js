@@ -87,7 +87,7 @@ function drawMenu(name) {
 
 
     }
-    else if (name == "lost") {
+    else if (name == "endGame") {
         Game.ctx.fillStyle = "rgb(1,1,1)";
         Game.ctx.font = "44px serif";
         Game.ctx.fillText("Game Over!", Game.canvas.width / 2 - Game.ctx.measureText("Game Over!").width, Game.canvas.height / 2);
@@ -98,8 +98,8 @@ function drawMenu(name) {
         window.requestAnimationFrame(function () {
             drawMenu("beginMenu");
         });
-    } else if (Game.state == "lost") {
-        drawMenu("lost");
+    } else if (Game.state == "endGame") {
+        drawMenu("endGame");
 
     } else if (Game.state == "game") {
         Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
@@ -207,7 +207,7 @@ function addPlayerLine() {
 function startGameButton() {
 
     // if there's at least one player, clear the menu and start the game
-    if (Game.players.length > 0) {
+    if (Game.players.length > 1) {
         var menu = document.getElementById("beginMenu");
         menu.style.display = "none";
         Game.state = "game";
@@ -219,7 +219,11 @@ function startGameButton() {
 // Game functions
 function startGame() {
     "use strict";
+    Game.ctx.clearRect(0,0,Game.canvas.width,Game.canvas.height);
+
     var balls = createBalls();
+
+    Game.frames = 0;
 
     makeGrid(32);
 
@@ -251,7 +255,8 @@ function createRandBall(color) {
     var w = Game.canvas.width;
     var h = Game.canvas.height;
     var perc = 0.9; // Percentage of canvas used
-    return {
+
+    var ball= {
         x: Math.floor((1 - perc) / 2 * w + Math.random() * w * perc),
         y: Math.floor((1 - perc) / 2 * h + Math.random() * h * perc),
         r: 3,
@@ -271,6 +276,14 @@ function createRandBall(color) {
         touchesTrail: false,
         counter: 0
     };
+
+    if(testPosition(ball)){
+        return ball;
+    }
+    else{
+        return createRandBall(ball.color);
+    }
+
 }
 
 function updateAndDraw(balls) {
@@ -294,23 +307,67 @@ function updateAndDraw(balls) {
 
     for (i = 0; i < balls.length; i += 1) {
         if (Game.players[i].state == "normal") {
-
             drawBall(balls[i]);
+        }
+    }
+
+
+
+
+
+
+    var leftPlayers = 0;
+    for(i=0;i<Game.players.length;i++){
+        if(Game.players[i].state == "normal"){
+            leftPlayers++;
         }
     }
 
     //TODO: Change this
 
+    var won = "";
 
 
-    window.requestAnimationFrame(function () {
-        updateAndDraw(balls);
-        Game.frames += 1;
+    if(leftPlayers == 1){
+        for(i=0;i<Game.players.length;i++){
+            if(Game.players[i].state == "lost"){
+                Game.players[i].state = "normal";
+            }
+            if(Game.players[i].score >= Game.players.length * 5){
+                won = Game.players[i].name;
+            }
+        }
+    if(won.length==0){
+        startGame();
+        return;
+    }
+    else{
 
-    });
+        Game.state = "endGame";
+
+
+    }
+    }
+    if(Game.frames==0){
+
+        setTimeout(function(){
+            Game.frames += 1;
+            updateAndDraw(balls);
+
+        }, 1000);
+    }
+    else {
+
+        window.requestAnimationFrame(function () {
+            updateAndDraw(balls);
+            Game.frames += 1;
+
+        });
+    }
+
 }
 function touchWalls(ball) {
-    console.log("checking wall collision");
+   // console.log("checking wall collision");
     if(ball.x <= ball.r|| ball.x >= Game.canvas.width - ball.r || ball.y <= ball.r || ball.y >= Game.canvas.height - ball.r){
         console.log("touched wall");
         return true;
@@ -540,6 +597,19 @@ function distance(x1, x2, y1, y2) { // Compute distance between 2 points
     "use strict";
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
+
+function testPosition(ball){
+
+    if(ball.x+ 90*(radToCoords(ball.dir).dx) <= ball.r || ball.x+50*(radToCoords(ball.dir).dx) > Game.canvas.width-ball.r || ball.y +50*(radToCoords(ball.dir).dy) <= ball.r || ball.y + 50*(radToCoords(ball.dir).dy) > Game.canvas.height - ball.r){
+        console.log("Bad position");
+
+        return false;
+    }
+
+    return true;
+
+}
+
 
 (function () {
     "use strict";
