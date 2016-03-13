@@ -88,10 +88,26 @@ function drawMenu(name) {
 
     }
     else if (name == "endGame") {
-        Game.ctx.fillStyle = "rgb(1,1,1)";
-        Game.ctx.font = "44px serif";
-        Game.ctx.fillText("Game Over!", Game.canvas.width / 2 - Game.ctx.measureText("Game Over!").width, Game.canvas.height / 2);
-        return;
+
+        var endMenu = document.getElementById("endMenu");
+        var winnerLine = document.getElementById("winnerLine");
+
+        endMenu.style.visibility = "visible";
+        endMenu.style.top = Game.canvas.height / 3 + "px";
+        endMenu.style.left = Game.canvas.offsetLeft + Game.canvas.width / 2 + 'px';
+        endMenu.style.fontSize = "28px";
+        clearNode(winnerLine);
+        var winner = "";
+        for (var player in Game.players) {
+            if (Game.players[player].state = 'won') {
+                winner += Game.players[player].name;
+            }
+        }
+
+        var winnerNode = document.createTextNode(winner);
+        winnerLine.appendChild(winnerNode);
+
+
     }
 
     if (Game.state == "begin") {
@@ -99,7 +115,9 @@ function drawMenu(name) {
             drawMenu("beginMenu");
         });
     } else if (Game.state == "endGame") {
-        drawMenu("endGame");
+        window.requestAnimationFrame(function () {
+            drawMenu("endGame");
+        });
 
     } else if (Game.state == "game") {
         Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
@@ -219,12 +237,12 @@ function startGameButton() {
 // Game functions
 function startGame() {
     "use strict";
-    Game.ctx.clearRect(0,0,Game.canvas.width,Game.canvas.height);
+    Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
 
     var balls = createBalls();
 
     Game.frames = 0;
-
+    Game.maxScore = 2;
     makeGrid(32);
 
     // start listening for key movement
@@ -256,7 +274,7 @@ function createRandBall(color) {
     var h = Game.canvas.height;
     var perc = 0.9; // Percentage of canvas used
 
-    var ball= {
+    var ball = {
         x: Math.floor((1 - perc) / 2 * w + Math.random() * w * perc),
         y: Math.floor((1 - perc) / 2 * h + Math.random() * h * perc),
         r: 3,
@@ -277,10 +295,10 @@ function createRandBall(color) {
         counter: 0
     };
 
-    if(testPosition(ball)){
+    if (testPosition(ball)) {
         return ball;
     }
-    else{
+    else {
         return createRandBall(ball.color);
     }
 
@@ -293,9 +311,7 @@ function updateAndDraw(balls) {
         if (Game.players[i].state == "normal") {
             balls[i] = updateBall(balls[i]);
         }
-    }
 
-    for (i = 0; i < balls.length; i += 1) {
         if (balls[i].touchesWall || balls[i].touchesTrail) {
             Game.players[i].state = "lost";
             incrementOtherScores();
@@ -303,54 +319,51 @@ function updateAndDraw(balls) {
             balls[i].touchesTrail = false;
             balls[i].touchesWall = false;
         }
-    }
-
-    for (i = 0; i < balls.length; i += 1) {
         if (Game.players[i].state == "normal") {
             drawBall(balls[i]);
         }
     }
 
-
-
-
-
-
     var leftPlayers = 0;
-    for(i=0;i<Game.players.length;i++){
-        if(Game.players[i].state == "normal"){
+    for (i = 0; i < Game.players.length; i++) {
+        if (Game.players[i].state == "normal") {
             leftPlayers++;
         }
     }
 
     //TODO: Change this
 
-    var won = "";
+    var winner = false;
 
 
-    if(leftPlayers == 1){
-        for(i=0;i<Game.players.length;i++){
-            if(Game.players[i].state == "lost"){
+    if (leftPlayers == 1) {
+        for (i = 0; i < Game.players.length; i++) {
+            if (Game.players[i].state == "lost") {
                 Game.players[i].state = "normal";
             }
-            if(Game.players[i].score >= Game.players.length * 5){
-                won = Game.players[i].name;
+            if (Game.players[i].score >= Game.maxScore) {
+                Game.players[i].state = "won";
+                winner = true;
             }
         }
-    if(won.length==0){
-        startGame();
-        return;
+        if (!winner) {
+            startGame();
+            return;
+        }
+
+        else {
+            Game.ctx.globalAlpha = 0;
+            fadeOut();
+
+            Game.state = "endGame";
+            drawMenu("endgame");
+            return;
+        }
     }
-    else{
 
-        Game.state = "endGame";
+    if (Game.frames == 0) {
 
-
-    }
-    }
-    if(Game.frames==0){
-
-        setTimeout(function(){
+        setTimeout(function () {
             Game.frames += 1;
             updateAndDraw(balls);
 
@@ -367,8 +380,8 @@ function updateAndDraw(balls) {
 
 }
 function touchWalls(ball) {
-   // console.log("checking wall collision");
-    if(ball.x <= ball.r|| ball.x >= Game.canvas.width - ball.r || ball.y <= ball.r || ball.y >= Game.canvas.height - ball.r){
+    // console.log("checking wall collision");
+    if (ball.x <= ball.r || ball.x >= Game.canvas.width - ball.r || ball.y <= ball.r || ball.y >= Game.canvas.height - ball.r) {
         console.log("touched wall");
         return true;
     }
@@ -461,7 +474,6 @@ function drawBall(ball) {
 }
 
 
-
 /* Nico's collision detection (buggy)
  function touchTrail(ball, dx, dy) {
  "use strict";
@@ -511,9 +523,9 @@ function touchTrail(ball) { //Similar to my old collision detection, but only in
 
 function makeGrid(cellSize) {
     Game.grid = [];
-    for (var i = 0; i < Game.canvas.height+cellSize; i += cellSize) {
+    for (var i = 0; i < Game.canvas.height + cellSize; i += cellSize) {
         Game.grid.push([]);
-        for (var j = 0; j < Game.canvas.width+cellSize; j += cellSize) {
+        for (var j = 0; j < Game.canvas.width + cellSize; j += cellSize) {
             Game.grid[i / cellSize].push([]);
         }
     }
@@ -557,7 +569,8 @@ function printScores() {
     scores.style.position = "absolute";
     scores.style.top = "80px";
     scores.style.left = Game.canvas.offsetLeft + Game.canvas.width + 30 + "px";
-
+    var upperText = document.createTextNode("First to " +  Game.maxScore + " points!");
+    scores.appendChild(upperText);
     for (var i = 0; i < Game.players.length; i++) {
 
         var line = document.createElement("p");
@@ -598,15 +611,30 @@ function distance(x1, x2, y1, y2) { // Compute distance between 2 points
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
 
-function testPosition(ball){
+function testPosition(ball) {
 
-    if(ball.x+ 90*(radToCoords(ball.dir).dx) <= ball.r || ball.x+50*(radToCoords(ball.dir).dx) > Game.canvas.width-ball.r || ball.y +50*(radToCoords(ball.dir).dy) <= ball.r || ball.y + 50*(radToCoords(ball.dir).dy) > Game.canvas.height - ball.r){
+    if (ball.x + 90 * (radToCoords(ball.dir).dx) <= ball.r || ball.x + 50 * (radToCoords(ball.dir).dx) > Game.canvas.width - ball.r || ball.y + 50 * (radToCoords(ball.dir).dy) <= ball.r || ball.y + 50 * (radToCoords(ball.dir).dy) > Game.canvas.height - ball.r) {
         console.log("Bad position");
 
         return false;
     }
 
     return true;
+
+}
+
+function fadeOut() {
+    Game.ctx.globalAlpha += 0.01;
+
+
+    Game.ctx.fillStyle = "white";
+    Game.ctx.fillRect(0, 0, Game.canvas.width, Game.canvas.height);
+    if(Game.ctx.globalAlpha <= 0.99) {
+
+        window.requestAnimationFrame(fadeOut);
+    }
+
+    else return;
 
 }
 
