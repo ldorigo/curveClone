@@ -93,18 +93,20 @@ function drawMenu(name) {
         var winnerLine = document.getElementById("winnerLine");
 
         endMenu.style.visibility = "visible";
-        endMenu.style.top = Game.canvas.height / 3 + "px";
-        endMenu.style.left = Game.canvas.offsetLeft + Game.canvas.width / 2 + 'px';
+        endMenu.style.top = Game.canvas.height / 3+ "px";
+        endMenu.style.left = Game.canvas.offsetLeft + Game.canvas.width / 4 + 'px';
         endMenu.style.fontSize = "28px";
         clearNode(winnerLine);
+        var text = "And the winner is...."
         var winner = "";
         for (var player in Game.players) {
-            if (Game.players[player].state = 'won') {
-                winner += Game.players[player].name;
+            if (Game.players[player].state == 'won') {
+                winner += "  " + Game.players[player].name + " ! ";
             }
         }
-
+        var textNode = document.createTextNode(text);
         var winnerNode = document.createTextNode(winner);
+        winnerLine.appendChild(textNode);
         winnerLine.appendChild(winnerNode);
 
 
@@ -242,7 +244,7 @@ function startGame() {
     var balls = createBalls();
 
     Game.frames = 0;
-    Game.maxScore = 2;
+    Game.maxScore = Game.players.length * 5;
     makeGrid(32);
 
     // start listening for key movement
@@ -305,7 +307,6 @@ function createRandBall(color) {
 }
 
 function updateAndDraw(balls) {
-    "use strict";
     var i;
     for (i = 0; i < balls.length; i += 1) {
         if (Game.players[i].state == "normal") {
@@ -331,8 +332,6 @@ function updateAndDraw(balls) {
         }
     }
 
-    //TODO: Change this
-
     var winner = false;
 
 
@@ -347,6 +346,9 @@ function updateAndDraw(balls) {
             }
         }
         if (!winner) {
+            Game.ctx.globalAlpha = 0;
+
+            fadeOut();
             startGame();
             return;
         }
@@ -640,7 +642,6 @@ function fadeOut() {
 
 
 (function () {
-    "use strict";
     // Sets everything in motion
     Game.canvas = document.getElementById("myCanvas");
     Game.ctx = Game.canvas.getContext("2d");
