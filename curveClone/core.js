@@ -1,12 +1,10 @@
-/*global window */
-// ^^ Comment for jsLint
+
 var Game = {
     state: 'begin',
     frames: 0,
     holeColor: [200, 200, 200, 1],
     players: [],
     scoreChange: true
-
 };
 
 var dictKeys = {
@@ -37,7 +35,6 @@ function keyDownHandler(e, balls) {
         }
     }
 }
-
 function keyUpHandler(e, balls) {
     "use strict";
     if (e.keyCode in dictKeys) {
@@ -58,7 +55,6 @@ function keyUpHandler(e, balls) {
 function drawMenu(name) {
     if (name == "beginMenu") {
 
-
         var menuContainer = document.getElementById("playersDiv");
         menuContainer.style.top = Game.canvas.height / 2.5 + "px";
         menuContainer.style.left = Game.canvas.offsetLeft + Game.canvas.width / 8 + "px";
@@ -70,6 +66,7 @@ function drawMenu(name) {
         startButton.style.top = window.getComputedStyle(menuContainer).top;
         startButton.style.left = Game.canvas.offsetLeft + 400 + "px";
 
+        //event listener on the start game button
         startButton.addEventListener("click", startGameButton, false);
 
         Game.ctx.fillStyle = "rgb(1,1,1)";
@@ -77,15 +74,12 @@ function drawMenu(name) {
         Game.ctx.fillText("CurveClone" +
             "", Game.canvas.width / 2 - Game.ctx.measureText("CurveClone").width / 2, Game.canvas.height / 4);
 
-
         if (document.getElementById("playersText").childElementCount < Game.players.length) {
             printPlayers();
         }
         if (document.getElementById("playersInput").childElementCount < 1 && Game.players.length < 4) {
             addPlayerLine();
         }
-
-
     }
     else if (name == "endGame") {
 
@@ -105,11 +99,13 @@ function drawMenu(name) {
             }
         }
         var textNode = document.createTextNode(text);
-        var winnerNode = document.createTextNode(winner);
+        var winnerNode = document.createTextNode(winner + " ");
         winnerLine.appendChild(textNode);
         winnerLine.appendChild(winnerNode);
 
+        var restartButton = document.getElementById("restartButton");
 
+        restartButton.addEventListener("click",resetAndRestart,false);
     }
 
     if (Game.state == "begin") {
@@ -127,6 +123,9 @@ function drawMenu(name) {
     }
 
 }
+function resetAndRestart(){
+    location.reload();
+}
 function addButtonClick(name) {
     var input = document.getElementById("nameInput");
 
@@ -135,7 +134,6 @@ function addButtonClick(name) {
         input.value = "";
         clearNode(document.getElementById("playersInput"));
     }
-
 
 }
 function addPlayer(name) {
@@ -238,17 +236,12 @@ function startGameButton() {
 
 // Game functions
 function startGame() {
-    "use strict";
     Game.ctx.clearRect(0, 0, Game.canvas.width, Game.canvas.height);
-
     var balls = createBalls();
-
     Game.frames = 0;
     Game.maxScore = Game.players.length * 5;
     makeGrid(32);
-
     // start listening for key movement
-
     document.addEventListener("keydown", function (e) {
         keyDownHandler(e, balls);
     }, false);
@@ -256,12 +249,13 @@ function startGame() {
         keyUpHandler(e, balls);
     }, false);
 
+    // Display scores on the side of the screen
     printScores();
+
     updateAndDraw(balls);
 }
 
 function createBalls() {
-    "use strict";
     // Returns an array of Ball objects
     var balls = [];
     for (var i = 0; i < Game.players.length; i++) {
@@ -271,7 +265,6 @@ function createBalls() {
 }
 
 function createRandBall(color) {
-    "use strict";
     var w = Game.canvas.width;
     var h = Game.canvas.height;
     var perc = 0.9; // Percentage of canvas used
@@ -307,12 +300,11 @@ function createRandBall(color) {
 }
 
 function updateAndDraw(balls) {
-    var i;
+        var i;
     for (i = 0; i < balls.length; i += 1) {
         if (Game.players[i].state == "normal") {
             balls[i] = updateBall(balls[i]);
         }
-
         if (balls[i].touchesWall || balls[i].touchesTrail) {
             Game.players[i].state = "lost";
             incrementOtherScores();
@@ -334,7 +326,6 @@ function updateAndDraw(balls) {
 
     var winner = false;
 
-
     if (leftPlayers == 1) {
         for (i = 0; i < Game.players.length; i++) {
             if (Game.players[i].state == "lost") {
@@ -346,25 +337,20 @@ function updateAndDraw(balls) {
             }
         }
         if (!winner) {
-            Game.ctx.globalAlpha = 0;
-
-            fadeOut();
+            Game.ctx.globalAlpha = 1;
             startGame();
             return;
         }
-
         else {
             Game.ctx.globalAlpha = 0;
-            fadeOut();
-
+            //fadeOut();
             Game.state = "endGame";
             drawMenu("endgame");
             return;
         }
     }
 
-    if (Game.frames == 0) {
-
+    if (Game.frames == 0){
         setTimeout(function () {
             Game.frames += 1;
             updateAndDraw(balls);
@@ -372,11 +358,9 @@ function updateAndDraw(balls) {
         }, 1000);
     }
     else {
-
         window.requestAnimationFrame(function () {
             updateAndDraw(balls);
             Game.frames += 1;
-
         });
     }
 
@@ -390,9 +374,6 @@ function touchWalls(ball) {
     return false;// Check if the ball coordinates are inside the canvas coordinates
 }
 function updateBall(ball) {
-    "use strict";
-
-
     // If the number of frames before next hole is 0, hole as true. Otherwise decrement.
 
     if (ball.framesToHole > 0) {
@@ -402,7 +383,6 @@ function updateBall(ball) {
     }
 
     // adjust dx and dy in function of pressed key
-
     if (ball.rightPressed) {
         ball.dir += Math.PI * ball.speed / 100;
     }
@@ -462,7 +442,6 @@ function updateBall(ball) {
 }
 
 function drawBall(ball) {
-    "use strict";
     Game.ctx.beginPath();
     Game.ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2, true);
     if (!ball.hole) {
@@ -474,36 +453,6 @@ function drawBall(ball) {
     Game.ctx.fill();
     Game.ctx.closePath();
 }
-
-
-/* Nico's collision detection (buggy)
- function touchTrail(ball, dx, dy) {
- "use strict";
-
- // Grab the pixel data at the current x y coordinates: i'm sure flash has an equivalent function //
-
- var pixelData = Game.ctx.getImageData(Math.floor(ball.x + dx*(ball.r)) , Math.floor(ball.y + dy*(ball.r)), 1, 1).data; //Math.floor to avoid 2x2array because of non-integer coordinates.
- //Get the Alpha value [r, g, b, a]
- //Alpha will be 255 if solid colour
-
- var DELTA = 10;
- if ((pixelData[0] || pixelData[1] || pixelData[2]) &&  //check if the color is white
- !(Math.abs(pixelData[0] - Game.holeColor[0]) < DELTA && // ... and if the color doesn't correspond to a hole
- Math.abs(pixelData[1] - Game.holeColor[1]) < DELTA &&
- Math.abs(pixelData[2] - Game.holeColor[2]) < DELTA)) {
- //debugging stuff
- console.log("x: " + Math.floor(ball.x + dx * 3) + " y:  " + Math.floor(ball.y + dy * 3));
- console.log(Game.ctx.getImageData(Math.floor(ball.x + dx * 3), Math.floor(ball.y + dy * 3), 1, 1).data);
- console.log("dx, dy:" +dx, dy);
- console.log("touched trail");
-
- return true;
- } else {
- return false;
- }
-
- }
- */
 
 function touchTrail(ball) { //Similar to my old collision detection, but only inside the area around the ball
 
@@ -547,7 +496,6 @@ function addToGrid(coordinates, cellSize) {
 }
 
 function radToCoords(rad) {
-    "use strict";
     return {
         dx: Math.cos(rad),
         dy: Math.sin(rad)
@@ -627,12 +575,9 @@ function testPosition(ball) {
 
 function fadeOut() {
     Game.ctx.globalAlpha += 0.01;
-
-
     Game.ctx.fillStyle = "white";
     Game.ctx.fillRect(0, 0, Game.canvas.width, Game.canvas.height);
     if(Game.ctx.globalAlpha <= 0.99) {
-
         window.requestAnimationFrame(fadeOut);
     }
 
